@@ -17,6 +17,15 @@
     const shortHermes = (p) => String(p || '').replace(/^\S*?\/\.hermes/, '~');
     const agentFolder = (id) => `${driveRootFolder.replace(/\/$/, '')}/${id}/`;
 
+    // Single fetch helper for JSON APIs. Same contract as the call sites it
+    // replaces: throws caller-supplied error when HTTP is not OK, otherwise
+    // returns parsed JSON (parse errors propagate to the caller's catch).
+    async function api(path, options = {}, errorMessage = 'Request failed') {
+      const res = await fetch(path, options);
+      if (!res.ok) throw new Error(errorMessage);
+      return res.json();
+    }
+
     function renderAgents() {
       const container = document.getElementById('agents-list');
       if (!container) return;
@@ -3582,9 +3591,7 @@ ${escapeHtml(m.content || '(No output returned)')}
 
     async function loadModelsView() {
       try {
-        const res = await fetch('/api/models/overview');
-        if (!res.ok) throw new Error('Gagal memuat ringkasan model');
-        const data = await res.json();
+        const data = await api('/api/models/overview', {}, 'Gagal memuat ringkasan model');
         globalModelsOverview = data;
 
         if (data.stats) {
@@ -3920,9 +3927,7 @@ ${escapeHtml(m.content || '(No output returned)')}
 
     async function loadChannelsView() {
       try {
-        const res = await fetch('/api/channels/overview');
-        if (!res.ok) throw new Error('Gagal memuat daftar channels');
-        const data = await res.json();
+        const data = await api('/api/channels/overview', {}, 'Gagal memuat daftar channels');
         globalChannelsOverview = data;
 
         if (data.stats) {
@@ -4345,9 +4350,7 @@ ${escapeHtml(m.content || '(No output returned)')}
 
     async function loadSkillsView() {
       try {
-        const res = await fetch('/api/skills');
-        if (!res.ok) throw new Error('Gagal memuat katalog skills');
-        const data = await res.json();
+        const data = await api('/api/skills', {}, 'Gagal memuat katalog skills');
         globalSkillsData = data;
 
         if (data.stats) {
@@ -4513,9 +4516,7 @@ ${escapeHtml(m.content || '(No output returned)')}
 
     async function viewSkillDetail(skillFilePath, skillName) {
       try {
-        const res = await fetch(`/api/skills/detail?path=${encodeURIComponent(skillFilePath)}`);
-        if (!res.ok) throw new Error('Gagal membaca isi SKILL.md');
-        const data = await res.json();
+        const data = await api(`/api/skills/detail?path=${encodeURIComponent(skillFilePath)}`, {}, 'Gagal membaca isi SKILL.md');
 
         const modal = document.getElementById('view-skill-modal');
         const titleEl = document.getElementById('skill-detail-title');
