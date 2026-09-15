@@ -278,11 +278,8 @@
       };
 
       try {
-        const res = await fetch(`/api/profiles/${id}`);
-        if (res.ok) {
-          const d = await res.json();
-          if (d.profile) p = d.profile;
-        }
+        const d = await api(`/api/profiles/${id}`, {}, 'Failed to load profile');
+        if (d.profile) p = d.profile;
       } catch (err) {}
 
       const initials = getInitials(p.name || p.id);
@@ -395,9 +392,8 @@
 
     async function loadAgentServices(agentId) {
       try {
-        const res = await fetch(`/api/profiles/${agentId}/services`);
-        if (res.ok) {
-          const d = await res.json();
+        const d = await api(`/api/profiles/${agentId}/services`, {}, 'Failed to load services');
+        {
           currentProfileServices = d.services || [];
           const countEl = document.getElementById('services-configured-count');
           if (countEl) countEl.textContent = `${d.configuredCount || 0} configured`;
@@ -442,7 +438,7 @@
         return;
       }
       try {
-        const res = await fetch(`/api/profiles/${currentEditAgentId}/services`, {
+        const { ok: keySaveOk } = await apiFull(`/api/profiles/${currentEditAgentId}/services`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -450,7 +446,7 @@
             keyValue: val
           })
         });
-        if (res.ok) {
+        if (keySaveOk) {
           alert(`Saved ${currentActiveServiceModal.name} key successfully!`);
           closeServiceKeyModal();
           await loadAgentServices(currentEditAgentId);
@@ -475,9 +471,8 @@
     async function loadAgentAbilities(agentId) {
       if (!agentId) return;
       try {
-        const res = await fetch(`/api/profiles/${agentId}/abilities`);
-        if (res.ok) {
-          const data = await res.json();
+        const data = await api(`/api/profiles/${agentId}/abilities`, {}, 'Failed to load abilities');
+        {
           currentAgentAbilities.profile = agentId;
           currentAgentAbilities.toolsets = data.toolsets || [];
           currentAgentAbilities.skills = data.skills || [];
@@ -674,14 +669,13 @@
         .map(t => t.id);
 
       try {
-        const res = await fetch(`/api/profiles/${currentEditAgentId}/abilities`, {
+        const { ok: abSaveOk, data } = await apiFull(`/api/profiles/${currentEditAgentId}/abilities`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ disabledSkills, disabledToolsets })
         });
 
-        const data = await res.json();
-        if (res.ok && data.success) {
+        if (abSaveOk && data.success) {
           if (btn) {
             btn.className = 'inline-flex items-center gap-1.5 bg-emerald-600 text-white text-xs font-semibold px-4 py-1.5 rounded-lg shadow-2xs transition';
             btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>Tersimpan ✓</span>`;
@@ -835,7 +829,7 @@
       const chk = document.getElementById('edit-agent-active-checkbox');
       const active = chk ? chk.checked : true;
       try {
-        await fetch(`/api/profiles/${currentEditAgentId}`, {
+        await apiFull(`/api/profiles/${currentEditAgentId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ active })
@@ -854,12 +848,12 @@
       if (!currentEditAgentId) return;
       const desc = document.getElementById('edit-agent-desc-input')?.value?.trim();
       try {
-        const res = await fetch(`/api/profiles/${currentEditAgentId}`, {
+        const { ok: descSaveOk } = await apiFull(`/api/profiles/${currentEditAgentId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ description: desc })
         });
-        if (res.ok) {
+        if (descSaveOk) {
           document.getElementById('edit-agent-subtitle').textContent = desc;
           alert('Description saved successfully!');
           fetchLiveMetrics();
@@ -875,13 +869,13 @@
       if (!currentEditAgentId) return;
       const desc = document.getElementById('edit-agent-desc-input')?.value?.trim();
       try {
-        const res = await fetch('/api/generate-persona', {
+        const { ok: personaOk, data: personaData } = await apiFull('/api/generate-persona', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: currentEditAgentId, description: desc })
         });
-        if (res.ok) {
-          const d = await res.json();
+        if (personaOk) {
+          const d = personaData;
           if (d.persona) {
             document.getElementById('edit-agent-persona-input').value = d.persona;
             alert('Auto-write generated new persona!');
@@ -896,12 +890,12 @@
       if (!currentEditAgentId) return;
       const persona = document.getElementById('edit-agent-persona-input')?.value;
       try {
-        const res = await fetch(`/api/profiles/${currentEditAgentId}`, {
+        const { ok: personaSaveOk } = await apiFull(`/api/profiles/${currentEditAgentId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ persona })
         });
-        if (res.ok) {
+        if (personaSaveOk) {
           alert('Persona (SOUL.md) saved successfully!');
         } else {
           alert('Failed to save persona');
@@ -917,12 +911,12 @@
       const fallbackModel = document.getElementById('edit-agent-fallback-input')?.value;
       const temperature = parseFloat(document.getElementById('edit-agent-temp-input')?.value || '0.7');
       try {
-        const res = await fetch(`/api/profiles/${currentEditAgentId}`, {
+        const { ok: modelSaveOk } = await apiFull(`/api/profiles/${currentEditAgentId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ model, fallbackModel, temperature })
         });
-        if (res.ok) {
+        if (modelSaveOk) {
           alert('Model settings saved successfully!');
           fetchLiveMetrics();
         } else {
@@ -937,12 +931,12 @@
       if (!currentEditAgentId) return;
       const telegramTopicId = document.getElementById('edit-agent-topic-id')?.value?.trim();
       try {
-        const res = await fetch(`/api/profiles/${currentEditAgentId}`, {
+        const { ok: svcSaveOk } = await apiFull(`/api/profiles/${currentEditAgentId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ telegramTopicId })
         });
-        if (res.ok) {
+        if (svcSaveOk) {
           alert('Telegram topic binding saved successfully!');
         } else {
           alert('Failed to save service settings');
@@ -955,12 +949,12 @@
     async function setAgentActive(id) {
       document.querySelectorAll('.agent-dropdown-menu').forEach(m => m.classList.add('hidden'));
       try {
-        const res = await fetch(`/api/profiles/${id}`, {
+        const { ok: setActiveOk } = await apiFull(`/api/profiles/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ active: true })
         });
-        if (res.ok) {
+        if (setActiveOk) {
           alert(`Agent ${id} set as active!`);
           fetchLiveMetrics();
         }
@@ -976,15 +970,15 @@
       if (!confirm(`Are you sure you want to delete profile "${id}"?`)) return;
 
       try {
-        const res = await fetch(`/api/profiles/${id}`, { method: 'DELETE' });
-        if (res.ok) {
+        const { ok: delOk, data: delData } = await apiFull(`/api/profiles/${id}`, { method: 'DELETE' });
+        if (delOk) {
           alert(`Profile ${id} deleted`);
           fetchLiveMetrics();
           if (currentEditAgentId === id) {
             closeEditAgent();
           }
         } else {
-          const err = await res.json();
+          const err = delData;
           alert('Error: ' + (err.error || 'Failed to delete'));
         }
       } catch (e) {
