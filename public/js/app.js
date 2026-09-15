@@ -1,12 +1,8 @@
     lucide.createIcons();
 
-    // Default agent list
+    // Placeholder until live profiles arrive via fetchLiveMetrics
     const agentsData = [
       { name: 'default', label: 'Local Hermes', tag: 'default', online: true },
-      { name: 'atlas', label: 'Atlas', tag: null, online: true },
-      { name: 'muse', label: 'Muse', tag: null, online: false },
-      { name: 'pixel', label: 'Pixel', tag: null, online: false },
-      { name: 'vera', label: 'Vera', tag: null, online: false },
     ];
 
     let globalSessionsData = null;
@@ -35,6 +31,17 @@
       try { data = await res.json(); } catch (e) { data = {}; }
       return { ok: res.ok, status: res.status, data };
     }
+
+    // Neutral display metadata derived from the agent id + live profile data.
+    // No hardcoded team names: cloners see their own agents here.
+    const capAgentId = (id) => id === 'default' ? 'Default' : String(id).charAt(0).toUpperCase() + String(id).slice(1);
+    const profileNameFor = (id) => (globalProfiles.find(p => p.id === id)?.name) || capAgentId(id);
+    const hashPick = (id, arr) => { let h = 0; for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return arr[h % arr.length]; };
+    const META_ICONS = ['user-check', 'compass', 'binary', 'pen-tool', 'palette', 'radar'];
+    const META_COLORS = ['indigo', 'blue', 'emerald', 'amber', 'purple', 'rose'];
+    const agentMetaFor = (id) => ({ name: profileNameFor(id), role: 'Agent', icon: hashPick(id, META_ICONS), color: hashPick(id, META_COLORS) });
+    const CHAT_BADGES = ['bg-amber-50 text-amber-700 border-amber-200', 'bg-indigo-50 text-indigo-700 border-indigo-200', 'bg-emerald-50 text-emerald-700 border-emerald-200', 'bg-purple-50 text-purple-700 border-purple-200', 'bg-pink-50 text-pink-700 border-pink-200', 'bg-blue-50 text-blue-700 border-blue-200'];
+    const chatBadgeFor = (profile) => ({ badge: hashPick(profile || 'x', CHAT_BADGES), name: profileNameFor(profile || 'x') });
 
     function renderAgents() {
       const container = document.getElementById('agents-list');
@@ -97,13 +104,7 @@
     }
 
     function renderTeamView() {
-      const profiles = globalProfiles.length > 0 ? globalProfiles : [
-        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', skillsCount: 84, path: '~/.hermes', description: 'Primary System & Intelligence Operative (Vestia Zeta)' },
-        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', skillsCount: 17, path: '~/.hermes/profiles/atlas', description: 'Chief AI Operations & Multi-Agent Team Orchestrator' },
-        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', skillsCount: 17, path: '~/.hermes/profiles/muse', description: 'Creative Content AI Agent' },
-        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', skillsCount: 17, path: '~/.hermes/profiles/pixel', description: 'Art & Visual Design Specialist' },
-        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', skillsCount: 17, path: '~/.hermes/profiles/vera', description: 'Research & Data Analysis Specialist' },
-      ];
+      const profiles = globalProfiles; // live data; empty until /api/profiles resolves
 
       // Update team summary metrics
       const totalEl = document.getElementById('team-metric-total');
@@ -268,11 +269,11 @@
 
       let p = globalProfiles.find(x => x.id === id) || {
         id: id,
-        name: id === 'default' ? 'Default' : id.charAt(0).toUpperCase() + id.slice(1),
-        description: `${id.charAt(0).toUpperCase() + id.slice(1)} AI Agent`,
-        model: 'ag/gemini-3.7-flash-high',
+        name: capAgentId(id),
+        description: `${capAgentId(id)} AI Agent`,
+        model: '',
         path: id === 'default' ? '~/.hermes' : `~/.hermes/profiles/${id}`,
-        skillsCount: 17,
+        skillsCount: 0,
         active: true
       };
 
@@ -1029,126 +1030,8 @@
       };
     }
 
-    // Real Kanban Tasks from Hermes SQLite kanban.db
-    let liveKanbanTasks = [
-      {
-        id: 'task-responsive-deck',
-        displayId: 't_respdeck',
-        priority: 'P100',
-        title: 'Secret Agent Operations Deck Responsive UI',
-        description: 'Membangun dashboard Mission Control responsif desktop, tablet, dan smartphone dengan modular view: Dashboard, Team, Kanban, Schedule, dan Documents.',
-        fullReport: 'BLUEPRINT DESAIN & ARSITEKTUR RESPONSIF OPERATIONS DECK\n\nStatus: SELESAI & TERVERIFIKASI.\n1. Topbar statis di posisi top:0 dengan z-index:35 pada tampilan mobile dan tablet.\n2. Modular switcher Workspace: Team, Kanban (Backlog, Ready, In Progress, Done), Schedule (Day, Week, Month, List), dan Documents 3-pane live file browser.\n3. Integrasi real backend API ke kanban.db SQLite dan Hermes native cron system.',
-        result: 'Membangun dashboard Mission Control responsif desktop, tablet, dan smartphone dengan modular view: Dashboard, Team, Kanban, Schedule, dan Documents.',
-        assignee: 'default',
-        status: 'done',
-        created: 'Today',
-        counter: 4
-      },
-      {
-        id: 'task-onboarding-pool',
-        displayId: 't_onboardp',
-        priority: 'P100',
-        title: 'New Agent Team Selection & Onboarding',
-        description: 'Atlas memimpin proses seleksi domain, penulisan SOUL.md, pairing model Antigravity, dan smoke test untuk sub-agent baru yang akan dibangun.',
-        fullReport: 'PROGRES ONBOARDING SUB-AGENT:\n- Lead Orchestrator: Atlas (@Leaderkgo_bot) aktif.\n- Sub-agent terdaftar: Muse (Creative), Pixel (Design), Vera (Research).\n- Model mapping: Antigravity ag/* terkonfigurasi di seluruh profil .env dengan 9router gateway.',
-        result: 'Atlas memimpin proses seleksi domain, penulisan SOUL.md, pairing model Antigravity, dan smoke test untuk sub-agent baru yang akan dibangun.',
-        assignee: 'atlas',
-        status: 'in_progress',
-        created: 'Yesterday',
-        counter: 3
-      },
-      {
-        id: 'task-9router',
-        displayId: 't_9routerp',
-        priority: 'P1',
-        title: '9router Proxy & Antigravity Model Hub',
-        description: 'Setup reverse proxy 9router di port 20128, menghubungkan 20 model Antigravity (ag/*) dan 4 model promosi ExperientialLabs (exp/*).',
-        fullReport: '9ROUTER REVERSE PROXY DEPLOYMENT:\n- Service PM2: 9router online di port 20128.\n- Provider upstream: Antigravity ag/* (20 model) dan ExperientialLabs exp/* (4 model promosi).\n- API Key tersinkronisasi di root .env dan seluruh profil Hermes.',
-        result: 'Setup reverse proxy 9router di port 20128, menghubungkan 20 model Antigravity (ag/*) dan 4 model promosi ExperientialLabs (exp/*).',
-        assignee: 'default',
-        status: 'done',
-        created: '2 days ago',
-        counter: 2
-      },
-      {
-        id: 'task-vps-opt',
-        displayId: 't_vpsopt01',
-        priority: 'P1',
-        title: 'VPS Linux Infrastructure & Memory Swap Tuning',
-        description: 'Alokasi 4.0 GiB swap file dengan vm.swappiness=20 di /etc/sysctl.d/99-swappiness.conf, PM2 daemon management, dan reduksi konsumsi RAM.',
-        fullReport: 'HASIL TUNING VPS:\n- Swapfile: 4.0 GiB aktif (/swapfile).\n- Swappiness: vm.swappiness=20 persistent di /etc/sysctl.d/99-swappiness.conf.\n- Penghematan memori: Penggunaan RAM turun dari 2.2 GiB ke ~1.2 GiB.',
-        result: 'Alokasi 4.0 GiB swap file dengan vm.swappiness=20 di /etc/sysctl.d/99-swappiness.conf, PM2 daemon management, dan reduksi konsumsi RAM.',
-        assignee: 'default',
-        status: 'done',
-        created: '3 days ago',
-        counter: 2
-      },
-      {
-        id: 'task-1',
-        displayId: 't_obsidian',
-        priority: 'P1',
-        title: 'Obsidian Vault & Git Remote Setup',
-        description: 'Konfigurasi Obsidian vault lokal dan sinkronisasi via Git remote SSH.',
-        fullReport: 'INTEGRASI OBSIDIAN GIT:\n- Vault path: <OBSIDIAN_VAULT_PATH>.\n- Remote: <OBSIDIAN_GIT_REMOTE>.\n- Branch: main (working tree clean & synced).',
-        result: 'Konfigurasi Obsidian vault lokal dan sinkronisasi via Git remote SSH.',
-        assignee: 'default',
-        status: 'done',
-        created: '3 days ago',
-        counter: 5
-      },
-      {
-        id: 'task-4',
-        displayId: 't_telegway',
-        priority: 'P1',
-        title: 'Telegram Gateway & Multi-Topic Notification',
-        description: 'Integrasi bot notifikasi multi-channel untuk update status server dan eksekusi background agent.',
-        fullReport: 'TELEGRAM NOTIFIER ENGINE:\n- Modul: telegram_notifier.js.\n- Otomatis mengirimkan alert saat task kanban berubah status atau cron dijalankan.',
-        result: 'Integrasi bot notifikasi multi-channel untuk update status server dan eksekusi background agent.',
-        assignee: 'default',
-        status: 'done',
-        created: '3 days ago',
-        counter: 3
-      },
-      {
-        id: 'task-vera-research',
-        displayId: 't_veravrcf',
-        priority: 'P1',
-        title: 'VRCFT Face Tracking Compatibility & Hardware Feasibility',
-        description: 'Riset komprehensif hardware Face Tracking (Quest Pro vs Pico 4 Pro) dan setup OSC Unity untuk avatar Midaris.',
-        fullReport: 'LAPORAN RISET VRCFT MIDARIS:\n- Add-on: Hash Booth item 8813256 (¥4,500).\n- Headset: Meta Quest Pro (rekomendasi terbaik face tracking) atau Pico 4 Pro.\n- Pipeline: Steam VRCFaceTracking -> VRChat OSC -> Unity 2022.3 blendshapes.',
-        result: 'Riset komprehensif hardware Face Tracking (Quest Pro vs Pico 4 Pro) dan setup OSC Unity untuk avatar Midaris.',
-        assignee: 'vera',
-        status: 'done',
-        created: 'Yesterday',
-        counter: 1
-      },
-      {
-        id: 'task-pixel-design',
-        displayId: 't_pixeldsg',
-        priority: 'P2',
-        title: 'Design System & Vector Assets for Operations Deck',
-        description: 'Standarisasi visual token, SVG architecture diagram, dan asset styling per sub-agent.',
-        fullReport: 'DESIGN SYSTEM SPEC:\n- Palet warna agent: Default (Amber/Black), Atlas (Navy Blue), Muse (Purple/Rose), Pixel (Cyan/Emerald), Vera (Teal).\n- Dark & Light mode tokens aligned with Tailwind palette.',
-        result: 'Standarisasi visual token, SVG architecture diagram, dan asset styling per sub-agent.',
-        assignee: 'pixel',
-        status: 'ready',
-        created: '2 days ago',
-        counter: 1
-      },
-      {
-        id: 'task-muse-content',
-        displayId: 't_musecont',
-        priority: 'P2',
-        title: 'Creative Content & Social Thread Builder',
-        description: 'Penyusunan blueprint konten dan sinkronisasi artikel ringkas ke subfolder Personal Branding di vault Obsidian.',
-        fullReport: 'KONTEN STRATEGY BRIEF:\n- Target: Personal branding habits tracker journey.\n- Output folder: <OBSIDIAN_VAULT_PATH>/Personal Branding.\n- Tone: Direct, insightful, tech-driven.',
-        result: 'Penyusunan blueprint konten dan sinkronisasi artikel ringkas ke subfolder Personal Branding di vault Obsidian.',
-        assignee: 'muse',
-        status: 'in_progress',
-        created: 'Yesterday',
-        counter: 2
-      }
-    ];
+    // Live Kanban tasks arrive via fetchLiveMetrics (/api/kanban); empty until loaded.
+    let liveKanbanTasks = [];
 
     let currentTaskDetailId = null;
 
@@ -1282,6 +1165,20 @@
     function persistKanbanColumns() { localStorage.setItem('kanban-columns', JSON.stringify(kanbanColumns)); localStorage.setItem('kanban-column-sort', JSON.stringify(kanbanSort)); }
     function sortKanbanCards(cards, mode) { return [...cards].sort((a,b) => mode === 'name' ? a.title.localeCompare(b.title) : mode === 'priority' ? String(a.priority).localeCompare(String(b.priority), undefined, {numeric:true}) : (b.createdAt || 0) - (a.createdAt || 0)); }
     function renderKanbanView() {
+      const af = document.getElementById('kanban-assignee-filter');
+      if (af) {
+        const curA = af.value || 'all';
+        const aIds = ['all', ...new Set(liveKanbanTasks.map(t => (t.assignee || 'default').toLowerCase()))];
+        af.innerHTML = aIds.map(id => `<option value="${id}">${id === 'all' ? 'All assignees' : id}</option>`).join('');
+        af.value = aIds.includes(curA) ? curA : 'all';
+      }
+      const nta = document.getElementById('new-task-assignee');
+      if (nta) {
+        const curN = nta.value || 'default';
+        const pIds = globalProfiles.length ? globalProfiles.map(x => x.id) : ['default'];
+        nta.innerHTML = pIds.map(id => `<option value="${id}">${id}</option>`).join('');
+        nta.value = pIds.includes(curN) ? curN : pIds[0];
+      }
       const assignee = (document.getElementById('kanban-assignee-filter')?.value || 'all').toLowerCase();
       const query = (document.getElementById('kanban-search')?.value || '').toLowerCase();
       const tasks = liveKanbanTasks.filter(t => (assignee === 'all' || (t.assignee || '').toLowerCase() === assignee) && (!query || `${t.title} ${t.result || ''} ${t.description || ''}`.toLowerCase().includes(query)));
@@ -1573,13 +1470,9 @@
       const agentSelect = document.getElementById('edit-sched-agent-select');
       if (agentSelect) {
         const availableAgents = (globalProfiles && globalProfiles.length > 0)
-          ? globalProfiles.map(p => ({ id: p.id, label: `${p.name || p.id} (${p.id === 'default' ? 'Vestia Zeta' : p.id})` }))
+          ? globalProfiles.map(p => ({ id: p.id, label: `${p.name || p.id} (${p.id})` }))
           : [
-              { id: 'default', label: 'Default (Vestia Zeta)' },
-              { id: 'atlas', label: 'Atlas (Lead Orchestrator)' },
-              { id: 'muse', label: 'Muse (Content Specialist)' },
-              { id: 'pixel', label: 'Pixel (Visual & Design)' },
-              { id: 'vera', label: 'Vera (Intelligence & Research)' }
+              { id: 'default', label: 'Default' }
             ];
 
         agentSelect.innerHTML = availableAgents.map(a => `<option value="${a.id}">${a.label}</option>`).join('');
@@ -2134,13 +2027,7 @@
     let docsOriginalContent = '';
 
     async function loadDocsView() {
-      const profiles = globalProfiles.length > 0 ? globalProfiles : [
-        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '~/.hermes' },
-        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '~/.hermes/profiles/atlas' },
-        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '~/.hermes/profiles/muse' },
-        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/pixel' },
-        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/vera' },
-      ];
+      const profiles = globalProfiles; // live data; empty until /api/profiles resolves
 
       const countEl = document.getElementById('docs-agents-count');
       if (countEl) countEl.textContent = profiles.length;
@@ -2188,13 +2075,7 @@
     }
 
     function filterDocsAgents() {
-      const profiles = globalProfiles.length > 0 ? globalProfiles : [
-        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '~/.hermes' },
-        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '~/.hermes/profiles/atlas' },
-        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '~/.hermes/profiles/muse' },
-        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/pixel' },
-        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/vera' },
-      ];
+      const profiles = globalProfiles; // live data; empty until /api/profiles resolves
       renderDocsAgentsList(profiles);
     }
 
@@ -2215,13 +2096,7 @@
       if (emptyPane) emptyPane.classList.remove('hidden');
       if (activePane) activePane.classList.add('hidden');
 
-      const profiles = globalProfiles.length > 0 ? globalProfiles : [
-        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '~/.hermes' },
-        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '~/.hermes/profiles/atlas' },
-        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '~/.hermes/profiles/muse' },
-        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/pixel' },
-        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/vera' },
-      ];
+      const profiles = globalProfiles; // live data; empty until /api/profiles resolves
       renderDocsAgentsList(profiles);
       await fetchDocsForAgent(agentId);
     }
@@ -2573,18 +2448,11 @@
     }
 
     // ================= WORKSPACE DRIVE (LOCAL VPS STORAGE) JS =================
-    let currentDriveAgent = 'atlas';
+    let currentDriveAgent = 'default';
     let driveDeliverablesData = [];
     let driveFilterQuery = '';
 
-    const agentMetaMap = {
-      default: { name: 'Vestia Zeta', role: 'Primary Intelligence', icon: 'user-check', color: 'indigo' },
-      atlas: { name: 'Atlas', role: 'Lead Orchestrator', icon: 'compass', color: 'blue' },
-      cipher: { name: 'Cipher', role: 'Engineering & Code', icon: 'binary', color: 'emerald' },
-      muse: { name: 'Muse', role: 'Content & Editorial', icon: 'pen-tool', color: 'amber' },
-      pixel: { name: 'Pixel', role: 'Visual & System Diagrams', icon: 'palette', color: 'purple' },
-      vera: { name: 'Vera', role: 'Deep Research & Recon', icon: 'radar', color: 'rose' }
-    };
+    // (agent display metadata now resolved via agentMetaFor() — no hardcoded team.)
 
     async function loadDriveView() {
       const btn = document.getElementById('btn-refresh-drive');
@@ -2623,7 +2491,7 @@
 
       if (totalEl) totalEl.textContent = `${totalCount} files`;
       if (mediaEl) mediaEl.textContent = `${mediaCount} media`;
-      const meta = agentMetaMap[currentDriveAgent] || { name: currentDriveAgent, role: 'Agent' };
+      const meta = agentMetaFor(currentDriveAgent);
       if (ribbonPathEl) ribbonPathEl.textContent = agentFolder(currentDriveAgent);
 
       renderDriveAgentFolders();
@@ -2634,11 +2502,22 @@
       const grid = document.getElementById('drive-agent-folders-grid');
       if (!grid) return;
 
-      const agentKeys = ['atlas', 'default', 'cipher', 'muse', 'pixel', 'vera'];
+      // Folders follow live profiles + drive data, not a hardcoded team list.
+      const agentKeys = [...new Set([...globalProfiles.map(x => x.id), ...driveDeliverablesData.map(d => d.agent)])];
+      if (!agentKeys.includes(currentDriveAgent)) currentDriveAgent = agentKeys[0] || 'default';
+      const curMeta = agentMetaFor(currentDriveAgent);
+      const _t = document.getElementById('drive-current-agent-title');
+      const _f = document.getElementById('drive-current-agent-folder-path');
+      const _d = document.getElementById('drive-current-agent-desc');
+      const _r = document.getElementById('drive-ribbon-path');
+      if (_t) _t.textContent = `${curMeta.name} / Outputs`;
+      if (_f) _f.textContent = agentFolder(currentDriveAgent);
+      if (_d) _d.textContent = `Folder penyimpanan output ${curMeta.name} di storage lokal VPS.`;
+      if (_r) _r.textContent = agentFolder(currentDriveAgent);
       
       let html = '';
       agentKeys.forEach(k => {
-        const meta = agentMetaMap[k] || { name: k, role: 'Agent', icon: 'bot', color: 'blue' };
+        const meta = agentMetaFor(k);
         const agentFiles = driveDeliverablesData.filter(d => d.agent === k);
         const count = agentFiles.length;
         const isSelected = currentDriveAgent === k;
@@ -2679,7 +2558,7 @@
 
     function selectDriveAgent(agentKey) {
       currentDriveAgent = agentKey;
-      const meta = agentMetaMap[agentKey] || { name: agentKey, role: 'Agent' };
+      const meta = agentMetaFor(agentKey);
       
       const titleEl = document.getElementById('drive-current-agent-title');
       const folderEl = document.getElementById('drive-current-agent-folder-path');
@@ -2930,14 +2809,7 @@
     let showChatLogsTools = true;
     let chatLogsSearchQuery = '';
 
-    const chatLogsAgentColors = {
-      default: { badge: 'bg-amber-50 text-amber-700 border-amber-200', name: 'Vestia Zeta' },
-      atlas: { badge: 'bg-indigo-50 text-indigo-700 border-indigo-200', name: 'Atlas' },
-      cipher: { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', name: 'Cipher' },
-      muse: { badge: 'bg-purple-50 text-purple-700 border-purple-200', name: 'Muse' },
-      pixel: { badge: 'bg-pink-50 text-pink-700 border-pink-200', name: 'Pixel' },
-      vera: { badge: 'bg-blue-50 text-blue-700 border-blue-200', name: 'Vera' }
-    };
+    // (chat badges now resolved via chatBadgeFor() — no hardcoded team.)
 
     function formatTimeAgo(ts) {
       if (!ts) return 'recently';
@@ -3010,6 +2882,7 @@
         {
           chatLogsSessionsData = data.sessions || [];
 
+          renderChatProfilePills();
           updateChatLogsMetrics();
           renderChatLogsSessionList();
 
@@ -3077,6 +2950,21 @@
       }
     }
 
+    // Profile pills follow live profiles + sessions, not a hardcoded team.
+    function renderChatProfilePills() {
+      const c = document.getElementById('chat-logs-profile-pills');
+      if (!c) return;
+      const ids = ['all', ...new Set([
+        ...globalProfiles.map(p => p.id),
+        ...(chatLogsSessionsData || []).map(x => x.profile).filter(Boolean),
+      ])];
+      c.innerHTML = ids.map(id => {
+        const active = currentChatLogsProfile === id;
+        const label = id === 'all' ? 'All Agents' : profileNameFor(id);
+        return `<button onclick="setChatLogsProfileFilter('${id}', this)" class="chat-logs-pill px-3 py-1 rounded-full font-medium ${active ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} cursor-pointer">${escapeHtml(label)}</button>`;
+      }).join('');
+    }
+
     function setChatLogsProfileFilter(profile, btn) {
       currentChatLogsProfile = profile;
       document.querySelectorAll('.chat-logs-pill').forEach(el => {
@@ -3133,7 +3021,7 @@
 
       container.innerHTML = filtered.map(s => {
         const isSelected = s.id === currentSelectedSessionId;
-        const profInfo = chatLogsAgentColors[s.profile] || { badge: 'bg-slate-100 text-slate-700 border-slate-200', name: s.profile };
+        const profInfo = chatBadgeFor(s.profile);
         const activeBg = isSelected ? 'bg-indigo-50/90 border-l-4 border-indigo-600 pl-2.5' : 'hover:bg-slate-50/80';
         const pulse = s.isActive ? '<span class="w-2 h-2 rounded-full shrink-0 bg-emerald-500 ring-2 ring-emerald-200 animate-pulse"></span>' : '<span class="w-2 h-2 rounded-full shrink-0 bg-slate-300"></span>';
         const dateStr = s.lastActivityAt ? formatTimeAgo(s.lastActivityAt) : '-';
@@ -3230,7 +3118,7 @@
       if (modelEl) modelEl.textContent = session.model || 'default';
       if (idEl) idEl.textContent = session.id;
 
-      const profInfo = chatLogsAgentColors[session.profile] || { badge: 'bg-slate-100 text-slate-700 border-slate-200', name: session.profile };
+      const profInfo = chatBadgeFor(session.profile);
       if (badgeEl) {
         badgeEl.textContent = profInfo.name;
         badgeEl.className = `px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${profInfo.badge}`;

@@ -187,7 +187,7 @@ function getProfileDetails(name) {
     botToken: botToken ? botToken.substring(0, 12) + '...' : '',
     gatewayStatus,
     active,
-    skillsCount: skillsCount || (isDefault ? 84 : 17),
+    skillsCount,
     toolsetsCount: 20,
     hasEnv: fs.existsSync(envPath),
     createdAtFormatted,
@@ -1059,7 +1059,7 @@ app.get('/api/models/overview', (req, res) => {
 
     for (const p of profiles) {
       const agentId = p.id;
-      const agentName = (p.id === 'default') ? 'Vestia Zeta (Default)' : p.name;
+      const agentName = p.name || p.id;
       const primaryModel = p.model || '';
       const fallbackModel = p.fallbackModel || '';
 
@@ -1480,21 +1480,24 @@ function scanDirFiles(dirPath, baseDir = dirPath) {
 app.get('/api/drive/deliverables', (req, res) => {
   try {
     const deliverables = [];
-    const profiles = ['default', 'atlas', 'cipher', 'muse', 'pixel', 'vera'];
+    // Profiles follow this machine: default + every workspace / profile dir present.
+    const profiles = ['default'];
+    for (const src of [WORKSPACE_DIR, PROFILES_DIR]) {
+      try {
+        if (fs.existsSync(src)) {
+          for (const d of fs.readdirSync(src, { withFileTypes: true })) {
+            if (d.isDirectory() && !d.name.startsWith('.') && !profiles.includes(d.name)) profiles.push(d.name);
+          }
+        }
+      } catch (e) {}
+    }
 
-    const agentNames = {
-      default: 'Vestia Zeta',
-      atlas: 'Atlas',
-      cipher: 'Cipher',
-      muse: 'Muse',
-      pixel: 'Pixel',
-      vera: 'Vera'
-    };
+    const agentLabelFor = (id) => id === 'default' ? 'Default' : id.charAt(0).toUpperCase() + id.slice(1);
 
     // 1. Scan the configured agent workspace dir
     profiles.forEach(p => {
       const agentDir = getAgentWorkspaceDir(p);
-      const agentLabel = agentNames[p] || p;
+      const agentLabel = agentLabelFor(p);
       const files = scanDirFiles(agentDir);
 
       files.forEach(f => {
@@ -1531,7 +1534,7 @@ app.get('/api/drive/deliverables', (req, res) => {
     profiles.forEach(p => {
       const pDir = getProfileDir(p);
       const cronOutputDir = path.join(pDir, 'cron', 'output');
-      const agentLabel = agentNames[p] || p;
+      const agentLabel = agentLabelFor(p);
 
       let jobMap = {};
       const jobsPath = path.join(pDir, 'cron', 'jobs.json');
@@ -1745,8 +1748,17 @@ app.delete('/api/drive/file', (req, res) => {
         try { fs.unlinkSync(sidecarJson); } catch (_) {}
       }
 
-      // Clean up peer agent workspaces (atlas, muse, pixel, vera)
-      const allProfiles = ['default', 'atlas', 'cipher', 'muse', 'pixel', 'vera'];
+      // Clean up peer agent workspaces (same derived profile set as the drive scan)
+      const allProfiles = ['default'];
+      try {
+        for (const src of [WORKSPACE_DIR, PROFILES_DIR]) {
+          if (fs.existsSync(src)) {
+            for (const d of fs.readdirSync(src, { withFileTypes: true })) {
+              if (d.isDirectory() && !d.name.startsWith('.') && !allProfiles.includes(d.name)) allProfiles.push(d.name);
+            }
+          }
+        }
+      } catch (e) {}
       for (const p of allProfiles) {
         if (p === effectiveAgent) continue;
         const pDir = getAgentWorkspaceDir(p);
@@ -1782,7 +1794,7 @@ app.delete('/api/vault/file', (req, res) => {
     const fileRel = req.body?.path || req.query?.path;
     if (!fileRel) return res.status(400).json({ success: false, error: 'Path is required' });
 
-    let targetRel = fileRel.replace(/^\/root\/notes\//, '').replace(/^\/+/, '');
+    let targetRel = fileRel.replace(new RegExp('^' + VAULT_DIR.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '/'), '').replace(/^\/+/, '');
     if (!targetRel.endsWith('.md') && !path.extname(targetRel)) {
       targetRel += '.md';
     }
@@ -2454,7 +2466,7 @@ app.get('/api/channels/overview', async (req, res) => {
 
       return {
         agentId: p.id,
-        agentName: (p.id === 'default') ? 'Vestia Zeta (Default)' : p.name,
+        agentName: p.name || p.id,
         hasBot: !!botToken,
         botTokenMasked: masked,
         topicId: topicId || '(Main Chat)',
@@ -3355,81 +3367,21 @@ app.get('/api/office/agents', (req, res) => {
       }
     }
 
-    const agentMeta = {
-      default: {
-        displayName: 'Vestia Zeta',
-        role: 'Intelligence Operative',
-        group: 'Core Operations',
-        avatarColor: 'from-slate-700 to-slate-900',
-        initials: 'VZ',
-        presetPrompts: [
-          'Status Operasi & Prioritas Hari Ini',
-          'Cek Scheduled Cron Jobs VPS',
-          'Audit System Health & Resources'
-        ]
-      },
-      atlas: {
-        displayName: 'Atlas',
-        role: 'Chief of AI Operations & Orchestrator',
-        group: 'Core Operations',
-        avatarColor: 'from-blue-600 to-indigo-700',
-        initials: 'AT',
-        presetPrompts: [
-          'Status Koordinasi Multi-Agent',
-          'Review Kanban Ready Tasks',
-          'Sinkronisasi Catatan Vault Obsidian'
-        ]
-      },
-      cipher: {
-        displayName: 'Cipher',
-        role: 'Lead Security Auditor & Code Analyst',
-        group: 'Core Operations',
-        avatarColor: 'from-emerald-600 to-teal-800',
-        initials: 'CP',
-        presetPrompts: [
-          'Audit Keamanan Codebase & OWASP',
-          'Scan Secret Leaks & API Keys',
-          'Review Dependensi & Patch Fixes'
-        ]
-      },
-      muse: {
-        displayName: 'Muse',
-        role: 'Content Producer & Video Clipper',
-        group: 'Autonomous Income Squad',
-        avatarColor: 'from-purple-600 to-pink-700',
-        initials: 'MS',
-        presetPrompts: [
-          'Cek Status Video Clipping Pipeline',
-          'Inspect Transkrip & Subtitle Burn',
-          'List Deliverables Baru di Drive'
-        ]
-      },
-      pixel: {
-        displayName: 'Pixel',
-        role: 'Distribution & Automation Engineer',
-        group: 'Autonomous Income Squad',
-        avatarColor: 'from-amber-500 to-orange-600',
-        initials: 'PX',
-        presetPrompts: [
-          'Check GitHub PRs & CI Status',
-          'Otomasi Distribusi Konten',
-          'Sync Worktree & Repository'
-        ]
-      },
-      vera: {
-        displayName: 'Vera',
-        role: 'Revenue & Affiliate Strategist',
-        group: 'Autonomous Income Squad',
-        avatarColor: 'from-cyan-600 to-blue-700',
-        initials: 'VR',
-        presetPrompts: [
-          'Monitor Kompetitor & Berita Pasar',
-          'Analisis Peluang Afiliasi & Income',
-          'Rangkum Tren Finansial Terkini'
-        ]
-      }
-    };
-
+    // Display metadata derived from live profile data — no hardcoded team.
+    // Cloners see their own agents with these generic styles.
+    const AVATAR_COLORS = ['from-slate-600 to-slate-800', 'from-blue-600 to-indigo-700', 'from-emerald-600 to-teal-800', 'from-purple-600 to-pink-700', 'from-amber-500 to-orange-600', 'from-cyan-600 to-blue-700'];
+    const hashPickMeta = (id) => { let h = 0; for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return AVATAR_COLORS[h % AVATAR_COLORS.length]; };
+    const agentMeta = {};
+    for (const mp of rawProfiles) {
+      agentMeta[mp.id] = {
+        displayName: mp.name || mp.id,
+        role: mp.description || 'Autonomous Agent',
+        group: 'Specialized Agents',
+        avatarColor: hashPickMeta(mp.id),
+        initials: (mp.name || mp.id).substring(0, 2).toUpperCase(),
+        presetPrompts: ['Periksa status tugas saat ini', 'Tampilkan kapabilitas agen']
+      };
+    }
     const agents = [];
 
     for (const p of rawProfiles) {
