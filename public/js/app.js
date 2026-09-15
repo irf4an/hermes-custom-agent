@@ -3766,13 +3766,12 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       if (submitBtn) submitBtn.disabled = true;
       try {
-        const res = await fetch('/api/models/assign', {
+        const { ok: assignOk, data } = await apiFull('/api/models/assign', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ agentId, model, role })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!assignOk || !data.success) {
           throw new Error(data.error || 'Gagal menyimpan konfigurasi model');
         }
         alert(`Model berhasil dialokasikan ke agent ${agentId} sebagai ${role}!`);
@@ -4077,13 +4076,12 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       if (submitBtn) submitBtn.disabled = true;
       try {
-        const res = await fetch('/api/channels/configure', {
+        const { ok: chCfgOk, data } = await apiFull('/api/channels/configure', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ channelId: activeConfiguringChannel.id, keys })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!chCfgOk || !data.success) {
           throw new Error(data.error || 'Gagal menyimpan konfigurasi channel');
         }
         alert(`Konfigurasi untuk ${activeConfiguringChannel.name} berhasil disimpan!`);
@@ -4165,13 +4163,12 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       if (submitBtn) submitBtn.disabled = true;
       try {
-        const res = await fetch('/api/channels/telegram', {
+        const { ok: tgSaveOk, data } = await apiFull('/api/channels/telegram', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!tgSaveOk || !data.success) {
           throw new Error(data.error || 'Gagal menyimpan pengaturan Telegram');
         }
         alert('Pengaturan Telegram berhasil disimpan!');
@@ -4186,13 +4183,12 @@ ${escapeHtml(m.content || '(No output returned)')}
 
     async function sendQuickTelegramTest() {
       try {
-        const res = await fetch('/api/channels/telegram/test', {
+        const { ok: tgTestOk, data } = await apiFull('/api/channels/telegram/test', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: '🛰️ [Mission Control] Test ping dari Telegram Channels Manager.' })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!tgTestOk || !data.success) {
           throw new Error(data.error || 'Gagal mengirim pesan test');
         }
         alert('Pesan uji coba berhasil dikirim ke Telegram!');
@@ -4203,11 +4199,10 @@ ${escapeHtml(m.content || '(No output returned)')}
 
     async function sendQuickTelegramStatus() {
       try {
-        const res = await fetch('/api/channels/telegram/send-status', {
+        const { ok: tgStatusOk, data } = await apiFull('/api/channels/telegram/send-status', {
           method: 'POST'
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!tgStatusOk || !data.success) {
           throw new Error(data.error || 'Gagal mengirim laporan status');
         }
         alert('Laporan telemetri server berhasil dikirim ke Topic #2 Telegram!');
@@ -4455,13 +4450,12 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       if (submitBtn) submitBtn.disabled = true;
       try {
-        const res = await fetch('/api/skills/create', {
+        const { ok: skCreateOk, data } = await apiFull('/api/skills/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, category, description, content })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!skCreateOk || !data.success) {
           throw new Error(data.error || 'Gagal membuat skill');
         }
         alert(data.message || 'Skill berhasil dibuat!');
@@ -4504,13 +4498,12 @@ ${escapeHtml(m.content || '(No output returned)')}
         submitBtn.innerHTML = '<span>Menginstall...</span>';
       }
       try {
-        const res = await fetch('/api/skills/install', {
+        const { ok: skInstOk, data } = await apiFull('/api/skills/install', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ identifier, category })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!skInstOk || !data.success) {
           throw new Error(data.error || 'Gagal menginstall skill');
         }
         alert(data.message || 'Skill berhasil diinstall!');
@@ -4533,13 +4526,12 @@ ${escapeHtml(m.content || '(No output returned)')}
       }
 
       try {
-        const res = await fetch('/api/skills/delete', {
+        const { ok: skDelOk, data } = await apiFull('/api/skills/delete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, category, path })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!skDelOk || !data.success) {
           throw new Error(data.error || 'Gagal menghapus skill');
         }
         alert(data.message || `Skill "${name}" berhasil dihapus.`);
@@ -4555,13 +4547,12 @@ ${escapeHtml(m.content || '(No output returned)')}
       }
 
       try {
-        const res = await fetch('/api/skills/restore', {
+        const { ok: skResOk, data } = await apiFull('/api/skills/restore', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: 'all' })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!skResOk || !data.success) {
           throw new Error(data.error || 'Gagal memulihkan skill official');
         }
         alert('Skill official Hermes berhasil dipulihkan!');
@@ -5185,8 +5176,7 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       try {
         const url = `/api/office/messages?agent=${agentId}${sessionId ? '&sessionId=' + sessionId : ''}`;
-        const res = await fetch(url);
-        const data = await res.json();
+        const { data } = await apiFull(url);
 
         if (data.success) {
           currentOfficeSessionId = data.sessionId;
@@ -5499,7 +5489,7 @@ ${escapeHtml(m.content || '(No output returned)')}
       if (sendBtn) sendBtn.disabled = true;
 
       try {
-        const res = await fetch('/api/office/chat', {
+        const { data } = await apiFull('/api/office/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -5508,8 +5498,6 @@ ${escapeHtml(m.content || '(No output returned)')}
             message: trimmed
           })
         });
-
-        const data = await res.json();
 
         const ind = document.getElementById(indicatorId);
         if (ind) ind.remove();
@@ -6149,9 +6137,8 @@ ${escapeHtml(m.content || '(No output returned)')}
       if (contentBox) contentBox.textContent = 'Loading details...';
 
       try {
-        const res = await fetch(`/api/graph/node?id=${encodeURIComponent(node.id)}`);
-        if (res.ok) {
-          const data = await res.json();
+        const { ok: gNodeOk, data } = await apiFull(`/api/graph/node?id=${encodeURIComponent(node.id)}`);
+        if (gNodeOk) {
           if (contentBox) {
             contentBox.textContent = data.content || data.node?.excerpt || '(No content text)';
           }
@@ -6228,12 +6215,11 @@ ${escapeHtml(m.content || '(No output returned)')}
       }
 
       try {
-        const res = await fetch('/api/vault/file', {
+        const { data } = await apiFull('/api/vault/file', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: relPath })
         });
-        const data = await res.json();
         if (data.success) {
           closeGraphInspector();
           await loadObsidianGraphView(true);
@@ -6271,9 +6257,8 @@ ${escapeHtml(m.content || '(No output returned)')}
       if (body) body.innerHTML = '<div class="p-6 text-center text-slate-400 font-mono">Loading vault notes...</div>';
 
       try {
-        const res = await fetch('/api/vault/files');
-        if (res.ok) {
-          const data = await res.json();
+        const { ok: vaultListOk, data } = await apiFull('/api/vault/files');
+        if (vaultListOk) {
           rawVaultFiles = data.files || [];
           if (countBadge) countBadge.textContent = `${rawVaultFiles.length} notes`;
           const query = document.getElementById('vault-notes-search')?.value || '';
@@ -6352,12 +6337,11 @@ ${escapeHtml(m.content || '(No output returned)')}
       }
 
       try {
-        const res = await fetch('/api/vault/file', {
+        const { data } = await apiFull('/api/vault/file', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: relPath })
         });
-        const data = await res.json();
         if (data.success) {
           await loadVaultNotesList();
           loadObsidianGraphView(true);
