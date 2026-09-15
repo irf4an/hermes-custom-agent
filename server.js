@@ -18,6 +18,10 @@ const VAULT_DIR = process.env.OBSIDIAN_VAULT_PATH || path.join(process.env.HOME 
 const KANBAN_DB = path.join(HERMES_HOME, 'kanban.db');
 const SKILLS_DIR = path.join(HERMES_HOME, 'skills');
 const KANBAN_HELPER = path.join(__dirname, 'kanban_helper.py');
+const WORKSPACE_DIR = process.env.AGENT_WORKSPACE_DIR || path.join(process.env.HOME || '/root', 'workspace');
+const REVENUE_OPS_DIR = process.env.REVENUE_OPS_DIR || path.join(process.env.HOME || '/root', 'revenue-ops');
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
+const OBSIDIAN_GIT_REMOTE = process.env.OBSIDIAN_GIT_REMOTE || '';
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -534,7 +538,7 @@ app.get('/api/profiles/:name/services', (req, res) => {
 
     const has9router = !!(envVars['HERMES_CUSTOM_47_84_189_232_20128_API_KEY'] || process.env.HERMES_CUSTOM_47_84_189_232_20128_API_KEY);
     const hasTelegram = !!(envVars['TELEGRAM_BOT_TOKEN'] || process.env.TELEGRAM_BOT_TOKEN);
-    const hasObsidian = !!(envVars['OBSIDIAN_VAULT_PATH'] || fs.existsSync('/root/notes'));
+    const hasObsidian = !!(envVars['OBSIDIAN_VAULT_PATH'] || fs.existsSync(VAULT_DIR));
     const hasOpenRouter = !!(envVars['OPENROUTER_API_KEY'] || process.env.OPENROUTER_API_KEY);
     const hasNvidia = !!(envVars['NVIDIA_API_KEY'] || envVars['NVIDIA_NIM_API_KEY']);
     const hasActual = !!(envVars['ACTUAL_SERVER_URL'] || envVars['ACTUAL_PASSWORD']);
@@ -560,10 +564,10 @@ app.get('/api/profiles/:name/services', (req, res) => {
       {
         id: 'obsidian',
         name: 'Obsidian Notes',
-        subtitle: 'Vault path /root/notes · git@github.com:irf4an/obsidian-notes.git',
+        subtitle: `Vault path ${VAULT_DIR}${OBSIDIAN_GIT_REMOTE ? ' · ' + OBSIDIAN_GIT_REMOTE : ''}`,
         configured: hasObsidian,
         keyName: 'OBSIDIAN_VAULT_PATH',
-        keyMasked: '/root/notes'
+        keyMasked: VAULT_DIR
       },
       {
         id: 'openrouter',
@@ -1434,7 +1438,6 @@ app.put('/api/agent-doc-content', (req, res) => {
 
 // ================= WORKSPACE DRIVE (LOCAL VPS STORAGE) APIS =================
 
-const WORKSPACE_DIR = '/root/workspace';
 if (!fs.existsSync(WORKSPACE_DIR)) fs.mkdirSync(WORKSPACE_DIR, { recursive: true });
 
 function getAgentWorkspaceDir(agent) {
@@ -1488,7 +1491,7 @@ app.get('/api/drive/deliverables', (req, res) => {
       vera: 'Vera'
     };
 
-    // 1. Scan /root/workspace/<agent>/
+    // 1. Scan the configured agent workspace dir
     profiles.forEach(p => {
       const agentDir = getAgentWorkspaceDir(p);
       const agentLabel = agentNames[p] || p;
@@ -1508,7 +1511,7 @@ app.get('/api/drive/deliverables', (req, res) => {
           name: f.name,
           relPath: f.relPath,
           fullPath: f.fullPath,
-          vpsFolder: `/root/workspace/${p}/`,
+          vpsFolder: `${WORKSPACE_DIR}/${p}/`,
           size: f.stat.size,
           sizeDisplay: f.stat.size > 1048576 
             ? `${(f.stat.size / 1048576).toFixed(1)} MB` 
@@ -1582,7 +1585,7 @@ app.get('/api/drive/deliverables', (req, res) => {
 
     res.json({
       success: true,
-      rootFolder: '/root/workspace/',
+      rootFolder: `${WORKSPACE_DIR}/`,
       storageType: 'Local VPS Dedicated Storage',
       deliverables
     });
@@ -1727,18 +1730,18 @@ app.delete('/api/drive/file', (req, res) => {
     fs.unlinkSync(targetPath);
 
     // If deleting an agent workspace file that originated from revenue-ops pipeline,
-    // also delete the master copy in /root/revenue-ops and any synced copies in peer agent workspaces.
+    // also delete the master copy in the revenue-ops pipeline dir and any synced copies in peer agent workspaces.
     // Otherwise, workspace-sync cronjob (runs every 5m) will automatically restore the file via rsync.
     if (!effectiveCron) {
-      const revenueOpsPath = path.resolve('/root/revenue-ops', effectiveFile);
-      if (revenueOpsPath.startsWith('/root/revenue-ops') && fs.existsSync(revenueOpsPath)) {
+      const revenueOpsPath = path.resolve(REVENUE_OPS_DIR, effectiveFile);
+      if (revenueOpsPath.startsWith(REVENUE_OPS_DIR) && fs.existsSync(revenueOpsPath)) {
         try { fs.unlinkSync(revenueOpsPath); } catch (_) {}
       }
 
       // Also clean up sidecar JSON metadata if present (e.g. for video clips)
       const baseNoExt = effectiveFile.replace(/\.[^/.]+$/, "");
-      const sidecarJson = path.resolve('/root/revenue-ops', baseNoExt + '.json');
-      if (sidecarJson.startsWith('/root/revenue-ops') && fs.existsSync(sidecarJson)) {
+      const sidecarJson = path.resolve(REVENUE_OPS_DIR, baseNoExt + '.json');
+      if (sidecarJson.startsWith(REVENUE_OPS_DIR) && fs.existsSync(sidecarJson)) {
         try { fs.unlinkSync(sidecarJson); } catch (_) {}
       }
 
@@ -2608,7 +2611,7 @@ app.get('/api/channels/overview', async (req, res) => {
       category: 'Primary Messaging',
       status: 'active',
       description: 'Multi-Agent Gateway & Notification Bridge via Telegram Bot API with forum topic routing.',
-      chatId: config.chatId || '1110756552',
+      chatId: config.chatId || TELEGRAM_CHAT_ID,
       hasToken: !!token,
       botTokenMasked: token ? (token.substring(0, 7) + '...' + token.substring(token.length - 4)) : '',
       agentBots: agentTelegramBots,
@@ -2648,7 +2651,7 @@ app.get('/api/channels/overview', async (req, res) => {
       channels: channelsList,
       telegramConfig: {
         enabled: config.enabled !== false,
-        chatId: config.chatId || '1110756552',
+        chatId: config.chatId || TELEGRAM_CHAT_ID,
         topics: config.topics || {},
         autoNotify: config.autoNotify || {}
       }
@@ -3280,10 +3283,10 @@ app.post('/api/chat-logs/sessions/prune-inactive', (req, res) => {
 app.get('/api/memory', (req, res) => {
   try {
     const memories = [
-      { category: 'Obsidian Vault', key: 'OBSIDIAN_VAULT_PATH', content: '/root/notes (Synced to git@github.com:irf4an/obsidian-notes.git)' },
+      { category: 'Obsidian Vault', key: 'OBSIDIAN_VAULT_PATH', content: `${VAULT_DIR}${OBSIDIAN_GIT_REMOTE ? ' (Synced to ' + OBSIDIAN_GIT_REMOTE + ')' : ''}` },
       { category: 'VPS Infrastructure', key: 'Swap Allocation', content: '4GB swapfile enabled with vm.swappiness=20 in /etc/sysctl.d/99-swappiness.conf' },
       { category: 'Services & Routing', key: 'PM2 Services', content: '9router on port 20128, secret-agent on port 3000' },
-      { category: 'User Persona', key: 'Ahmad Irfan', content: 'Telegram ID: 1110756552 | Direct, concise, no conversational filler' }
+      { category: 'User Persona', key: process.env.OPERATOR_NAME || 'Operator', content: TELEGRAM_CHAT_ID ? `Telegram ID: ${TELEGRAM_CHAT_ID}` : 'Not configured' }
     ];
     res.json({ success: true, memories });
   } catch (err) {

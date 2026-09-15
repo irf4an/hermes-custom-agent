@@ -11,6 +11,12 @@
 
     let globalSessionsData = null;
 
+    // Deployment-specific paths are supplied by the backend (HERMES_HOME, AGENT_WORKSPACE_DIR,
+    // /api/drive/deliverables -> rootFolder). The constants below are pre-fetch placeholders only.
+    let driveRootFolder = '~/workspace';
+    const shortHermes = (p) => String(p || '').replace(/^\S*?\/\.hermes/, '~');
+    const agentFolder = (id) => `${driveRootFolder.replace(/\/$/, '')}/${id}/`;
+
     function renderAgents() {
       const container = document.getElementById('agents-list');
       if (!container) return;
@@ -73,11 +79,11 @@
 
     function renderTeamView() {
       const profiles = globalProfiles.length > 0 ? globalProfiles : [
-        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', skillsCount: 84, path: '/root/.hermes', description: 'Primary System & Intelligence Operative (Vestia Zeta)' },
-        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', skillsCount: 17, path: '/root/.hermes/profiles/atlas', description: 'Chief AI Operations & Multi-Agent Team Orchestrator' },
-        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', skillsCount: 17, path: '/root/.hermes/profiles/muse', description: 'Creative Content AI Agent' },
-        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', skillsCount: 17, path: '/root/.hermes/profiles/pixel', description: 'Art & Visual Design Specialist' },
-        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', skillsCount: 17, path: '/root/.hermes/profiles/vera', description: 'Research & Data Analysis Specialist' },
+        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', skillsCount: 84, path: '~/.hermes', description: 'Primary System & Intelligence Operative (Vestia Zeta)' },
+        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', skillsCount: 17, path: '~/.hermes/profiles/atlas', description: 'Chief AI Operations & Multi-Agent Team Orchestrator' },
+        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', skillsCount: 17, path: '~/.hermes/profiles/muse', description: 'Creative Content AI Agent' },
+        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', skillsCount: 17, path: '~/.hermes/profiles/pixel', description: 'Art & Visual Design Specialist' },
+        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', skillsCount: 17, path: '~/.hermes/profiles/vera', description: 'Research & Data Analysis Specialist' },
       ];
 
       // Update team summary metrics
@@ -135,7 +141,7 @@
           const isOnline = p.gatewayStatus === 'running';
           const skills = p.skillsCount || 17;
           const model = p.model || 'ag/gemini-3.7-flash-high';
-          const path = p.path || `/root/.hermes/profiles/${p.id}`;
+          const path = p.path || `~/.hermes/profiles/${p.id}`;
           const profileStats = (globalSessionsData && globalSessionsData.sessionsByProfile && globalSessionsData.sessionsByProfile[p.id]) || { total: 0, active: 0 };
 
           return `
@@ -189,7 +195,7 @@
                     <i data-lucide="wrench" class="w-3 h-3 text-slate-400"></i> ${skills} skills
                   </span>
                   <span class="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-600 font-mono text-[10px]">
-                    <i data-lucide="folder" class="w-3 h-3 text-slate-400"></i> ${escapeHtml(path.replace('/root/.hermes', '~'))}
+                    <i data-lucide="folder" class="w-3 h-3 text-slate-400"></i> ${escapeHtml(shortHermes(path))}
                   </span>
                 </div>
               </div>
@@ -246,7 +252,7 @@
         name: id === 'default' ? 'Default' : id.charAt(0).toUpperCase() + id.slice(1),
         description: `${id.charAt(0).toUpperCase() + id.slice(1)} AI Agent`,
         model: 'ag/gemini-3.7-flash-high',
-        path: id === 'default' ? '/root/.hermes' : `/root/.hermes/profiles/${id}`,
+        path: id === 'default' ? '~/.hermes' : `~/.hermes/profiles/${id}`,
         skillsCount: 17,
         active: true
       };
@@ -1063,9 +1069,9 @@
         displayId: 't_obsidian',
         priority: 'P1',
         title: 'Obsidian Vault & Git Remote Setup',
-        description: 'Konfigurasi Obsidian vault di /root/notes dan sync SSH ke git@github.com:irf4an/obsidian-notes.git',
-        fullReport: 'INTEGRASI OBSIDIAN GIT:\n- Vault path: /root/notes.\n- Remote: git@github.com:irf4an/obsidian-notes.git.\n- Branch: main (working tree clean & synced).',
-        result: 'Konfigurasi Obsidian vault di /root/notes dan sync SSH ke git@github.com:irf4an/obsidian-notes.git',
+        description: 'Konfigurasi Obsidian vault lokal dan sinkronisasi via Git remote SSH.',
+        fullReport: 'INTEGRASI OBSIDIAN GIT:\n- Vault path: <OBSIDIAN_VAULT_PATH>.\n- Remote: <OBSIDIAN_GIT_REMOTE>.\n- Branch: main (working tree clean & synced).',
+        result: 'Konfigurasi Obsidian vault lokal dan sinkronisasi via Git remote SSH.',
         assignee: 'default',
         status: 'done',
         created: '3 days ago',
@@ -1116,7 +1122,7 @@
         priority: 'P2',
         title: 'Creative Content & Social Thread Builder',
         description: 'Penyusunan blueprint konten dan sinkronisasi artikel ringkas ke subfolder Personal Branding di vault Obsidian.',
-        fullReport: 'KONTEN STRATEGY BRIEF:\n- Target: Personal branding habits tracker journey.\n- Output folder: /root/notes/Personal Branding.\n- Tone: Direct, insightful, tech-driven.',
+        fullReport: 'KONTEN STRATEGY BRIEF:\n- Target: Personal branding habits tracker journey.\n- Output folder: <OBSIDIAN_VAULT_PATH>/Personal Branding.\n- Tone: Direct, insightful, tech-driven.',
         result: 'Penyusunan blueprint konten dan sinkronisasi artikel ringkas ke subfolder Personal Branding di vault Obsidian.',
         assignee: 'muse',
         status: 'in_progress',
@@ -1194,7 +1200,7 @@
       document.getElementById('task-meta-assignee').textContent = task.assignee;
       document.getElementById('task-meta-priority').textContent = task.priority || 'P100';
       document.getElementById('task-meta-created').textContent = task.created || '2 months ago';
-      document.getElementById('task-meta-workspace').textContent = `/root/.hermes/kanban/workspaces/${task.displayId || 't_06e5983d'}`;
+      document.getElementById('task-meta-workspace').textContent = `~/.hermes/kanban/workspaces/${task.displayId || 't_06e5983d'}`;
 
       // Update Tracking Status Timeline
       const timeAgo = task.created || '2 months ago';
@@ -2117,11 +2123,11 @@
 
     async function loadDocsView() {
       const profiles = globalProfiles.length > 0 ? globalProfiles : [
-        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '/root/.hermes' },
-        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '/root/.hermes/profiles/atlas' },
-        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '/root/.hermes/profiles/muse' },
-        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '/root/.hermes/profiles/pixel' },
-        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '/root/.hermes/profiles/vera' },
+        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '~/.hermes' },
+        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '~/.hermes/profiles/atlas' },
+        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '~/.hermes/profiles/muse' },
+        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/pixel' },
+        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/vera' },
       ];
 
       const countEl = document.getElementById('docs-agents-count');
@@ -2171,11 +2177,11 @@
 
     function filterDocsAgents() {
       const profiles = globalProfiles.length > 0 ? globalProfiles : [
-        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '/root/.hermes' },
-        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '/root/.hermes/profiles/atlas' },
-        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '/root/.hermes/profiles/muse' },
-        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '/root/.hermes/profiles/pixel' },
-        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '/root/.hermes/profiles/vera' },
+        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '~/.hermes' },
+        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '~/.hermes/profiles/atlas' },
+        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '~/.hermes/profiles/muse' },
+        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/pixel' },
+        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/vera' },
       ];
       renderDocsAgentsList(profiles);
     }
@@ -2198,11 +2204,11 @@
       if (activePane) activePane.classList.add('hidden');
 
       const profiles = globalProfiles.length > 0 ? globalProfiles : [
-        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '/root/.hermes' },
-        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '/root/.hermes/profiles/atlas' },
-        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '/root/.hermes/profiles/muse' },
-        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '/root/.hermes/profiles/pixel' },
-        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '/root/.hermes/profiles/vera' },
+        { id: 'default', name: 'Default', isDefault: true, gatewayStatus: 'running', model: 'ag/gemini-3.7-flash-high', path: '~/.hermes' },
+        { id: 'atlas', name: 'Atlas', isDefault: false, gatewayStatus: 'running', model: 'ag/claude-opus-4-6-thinking', path: '~/.hermes/profiles/atlas' },
+        { id: 'muse', name: 'Muse', isDefault: false, gatewayStatus: 'stopped', model: 'ag/claude-sonnet-4-6', path: '~/.hermes/profiles/muse' },
+        { id: 'pixel', name: 'Pixel', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/pixel' },
+        { id: 'vera', name: 'Vera', isDefault: false, gatewayStatus: 'stopped', model: 'ag/gemini-2.5-flash', path: '~/.hermes/profiles/vera' },
       ];
       renderDocsAgentsList(profiles);
       await fetchDocsForAgent(agentId);
@@ -2226,7 +2232,7 @@
         if (res.ok) {
           const data = await res.json();
           currentDocsData = data;
-          basePathEl.textContent = data.basePath || (agentId === 'default' ? '/root/.hermes' : `/root/.hermes/profiles/${agentId}`);
+          basePathEl.textContent = data.basePath || (agentId === 'default' ? '~/.hermes' : `~/.hermes/profiles/${agentId}`);
           renderDocsTree(data.docs);
         } else {
           treeContainer.innerHTML = `<div class="text-xs text-slate-400 p-4 text-center">Failed to load files</div>`;
@@ -2560,12 +2566,12 @@
     let driveFilterQuery = '';
 
     const agentMetaMap = {
-      default: { name: 'Vestia Zeta', role: 'Primary Intelligence', folder: '/root/workspace/default/', icon: 'user-check', color: 'indigo' },
-      atlas: { name: 'Atlas', role: 'Lead Orchestrator', folder: '/root/workspace/atlas/', icon: 'compass', color: 'blue' },
-      cipher: { name: 'Cipher', role: 'Engineering & Code', folder: '/root/workspace/cipher/', icon: 'binary', color: 'emerald' },
-      muse: { name: 'Muse', role: 'Content & Editorial', folder: '/root/workspace/muse/', icon: 'pen-tool', color: 'amber' },
-      pixel: { name: 'Pixel', role: 'Visual & System Diagrams', folder: '/root/workspace/pixel/', icon: 'palette', color: 'purple' },
-      vera: { name: 'Vera', role: 'Deep Research & Recon', folder: '/root/workspace/vera/', icon: 'radar', color: 'rose' }
+      default: { name: 'Vestia Zeta', role: 'Primary Intelligence', icon: 'user-check', color: 'indigo' },
+      atlas: { name: 'Atlas', role: 'Lead Orchestrator', icon: 'compass', color: 'blue' },
+      cipher: { name: 'Cipher', role: 'Engineering & Code', icon: 'binary', color: 'emerald' },
+      muse: { name: 'Muse', role: 'Content & Editorial', icon: 'pen-tool', color: 'amber' },
+      pixel: { name: 'Pixel', role: 'Visual & System Diagrams', icon: 'palette', color: 'purple' },
+      vera: { name: 'Vera', role: 'Deep Research & Recon', icon: 'radar', color: 'rose' }
     };
 
     async function loadDriveView() {
@@ -2581,6 +2587,7 @@
         if (res.ok) {
           const data = await res.json();
           driveDeliverablesData = data.deliverables || [];
+          if (data.rootFolder) driveRootFolder = data.rootFolder;
         }
       } catch (e) {
         console.error('Error fetching drive deliverables:', e);
@@ -2605,8 +2612,8 @@
 
       if (totalEl) totalEl.textContent = `${totalCount} files`;
       if (mediaEl) mediaEl.textContent = `${mediaCount} media`;
-      const meta = agentMetaMap[currentDriveAgent] || { folder: `/root/workspace/${currentDriveAgent}/` };
-      if (ribbonPathEl) ribbonPathEl.textContent = meta.folder;
+      const meta = agentMetaMap[currentDriveAgent] || { name: currentDriveAgent, role: 'Agent' };
+      if (ribbonPathEl) ribbonPathEl.textContent = agentFolder(currentDriveAgent);
 
       renderDriveAgentFolders();
       renderDriveFiles();
@@ -2620,7 +2627,7 @@
       
       let html = '';
       agentKeys.forEach(k => {
-        const meta = agentMetaMap[k] || { name: k, role: 'Agent', folder: `/root/workspace/${k}/`, icon: 'bot', color: 'blue' };
+        const meta = agentMetaMap[k] || { name: k, role: 'Agent', icon: 'bot', color: 'blue' };
         const agentFiles = driveDeliverablesData.filter(d => d.agent === k);
         const count = agentFiles.length;
         const isSelected = currentDriveAgent === k;
@@ -2648,7 +2655,7 @@
             </div>
 
             <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span class="font-mono text-[10.5px] text-slate-400 truncate max-w-[170px]">${meta.folder}</span>
+              <span class="font-mono text-[10.5px] text-slate-400 truncate max-w-[170px]">${agentFolder(k)}</span>
               <span class="font-semibold text-slate-700">${count} items</span>
             </div>
           </div>
@@ -2661,7 +2668,7 @@
 
     function selectDriveAgent(agentKey) {
       currentDriveAgent = agentKey;
-      const meta = agentMetaMap[agentKey] || { name: agentKey, folder: `/root/workspace/${agentKey}/`, role: 'Agent' };
+      const meta = agentMetaMap[agentKey] || { name: agentKey, role: 'Agent' };
       
       const titleEl = document.getElementById('drive-current-agent-title');
       const folderEl = document.getElementById('drive-current-agent-folder-path');
@@ -2669,9 +2676,9 @@
       const ribbonPathEl = document.getElementById('drive-ribbon-path');
 
       if (titleEl) titleEl.textContent = `${meta.name} / Outputs`;
-      if (folderEl) folderEl.textContent = meta.folder;
+      if (folderEl) folderEl.textContent = agentFolder(agentKey);
       if (descEl) descEl.textContent = `Folder penyimpanan output ${meta.name} di storage lokal VPS.`;
-      if (ribbonPathEl) ribbonPathEl.textContent = meta.folder;
+      if (ribbonPathEl) ribbonPathEl.textContent = agentFolder(agentKey);
 
       renderDriveAgentFolders();
       renderDriveFiles();
@@ -2684,8 +2691,7 @@
     }
 
     function copyCurrentAgentPath() {
-      const meta = agentMetaMap[currentDriveAgent] || { folder: `/root/workspace/${currentDriveAgent}/` };
-      navigator.clipboard.writeText(meta.folder);
+      navigator.clipboard.writeText(agentFolder(currentDriveAgent));
       const btnText = document.getElementById('btn-copy-path-text');
       if (btnText) {
         btnText.textContent = 'Path Copied!';
@@ -2809,7 +2815,7 @@
 
       if (titleEl) titleEl.textContent = f.name;
       if (metaEl) metaEl.textContent = `${f.agentName} · ${f.sizeDisplay} · ${f.source}`;
-      if (locationEl) locationEl.innerHTML = `<i data-lucide="hard-drive" class="w-3.5 h-3.5 text-emerald-600"></i> ${f.vpsFolder || '/root/workspace/'}`;
+      if (locationEl) locationEl.innerHTML = `<i data-lucide="hard-drive" class="w-3.5 h-3.5 text-emerald-600"></i> ${f.vpsFolder || driveRootFolder}`;
       if (downloadBtn) {
         downloadBtn.href = f.downloadUrl;
         downloadBtn.download = f.name;
@@ -3954,7 +3960,7 @@ ${escapeHtml(m.content || '(No output returned)')}
       if (!tg) return;
 
       const chatIdEl = document.getElementById('tg-card-chat-id');
-      if (chatIdEl) chatIdEl.textContent = tg.chatId || '1110756552';
+      if (chatIdEl) chatIdEl.textContent = tg.chatId || '—';
 
       const sTopicEl = document.getElementById('tg-topic-server');
       const aTopicEl = document.getElementById('tg-topic-agent');
@@ -4098,7 +4104,7 @@ ${escapeHtml(m.content || '(No output returned)')}
                   </div>
                   <div class="flex items-center justify-between text-slate-600">
                     <span class="text-slate-400">Target Chat:</span>
-                    <span class="font-mono text-slate-800 font-semibold">${escapeHtml(ch.chatId || '1110756552')}</span>
+                    <span class="font-mono text-slate-800 font-semibold">${escapeHtml(ch.chatId || '—')}</span>
                   </div>
                 ` : `
                   <div class="text-[10px] font-bold text-slate-400 uppercase">Parameter Kredensial:</div>
@@ -4224,7 +4230,7 @@ ${escapeHtml(m.content || '(No output returned)')}
         const alTopicInput = document.getElementById('tg-settings-topic-alerts');
         const enabledCheckbox = document.getElementById('tg-settings-enabled');
 
-        if (chatIdInput) chatIdInput.value = tg.chatId || '1110756552';
+        if (chatIdInput) chatIdInput.value = tg.chatId || '';
         if (sTopicInput) sTopicInput.value = tg.topics?.server_status || '2';
         if (aTopicInput) aTopicInput.value = tg.topics?.agent_execution || '4';
         if (alTopicInput) alTopicInput.value = tg.topics?.system_alerts || '6';
