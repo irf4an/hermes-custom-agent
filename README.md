@@ -53,6 +53,39 @@ node server.js
 Do not commit credentials, runtime databases, local configuration, or generated
 state. See `.gitignore`.
 
+## Clone setup (using this template on another agent)
+
+Cloning gives you code + views, not data. The dashboard always reads live
+from your own machine (see Configuration above), so after clone it shows
+your profiles, your kanban, your vault — never the author's.
+
+Agent instructions after `git clone`:
+
+```bash
+bash scripts/setup-clone.sh   # creates dirs, empty kanban schema, config skeleton
+cp .env.example .env          # then fill your own values
+npm install
+node server.js
+```
+
+What the script does: creates `$HERMES_HOME/skills|profiles`, vault,
+workspace dirs (empty); initializes an empty kanban `tasks` table;
+writes a disabled `channels_config.json` skeleton only if missing;
+checks `node` + `server.js` syntax. It copies zero personal data.
+
+What your agent still sets up manually:
+
+1. `.env` — your own `TELEGRAM_CHAT_ID`, `OBSIDIAN_GIT_REMOTE`,
+   `OPERATOR_NAME`. Leave empty what you don't have.
+2. Hermes profiles, skills, cron jobs, vault notes — recreate your own.
+   Rule patterns worth copying (structure, not content): per-profile
+   layout (`config.yaml`, `SOUL.md`, `cron/`, `skills/`, `memories/`,
+   `workspace/`), per-agent workspace subfolders, `channels_config.json`
+   key shape (`enabled, botToken, chatId, topics, autoNotify, history`).
+3. Never copy from someone else: tokens/keys (`*_TOKEN*`, `*_API_KEY*`),
+   `auth.json`, `*.db` contents, chat IDs, vault notes, or a filled
+   `channels_config.json`.
+
 ## Status
 
 Personal project. Interfaces and APIs may change while Hermes Agent evolves.
