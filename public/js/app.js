@@ -26,6 +26,16 @@
       return res.json();
     }
 
+    // Same as api(), but preserves HTTP status and body for callers that
+    // branch on them (202 vs 409, data.success, server error text).
+    // Returns { ok, status, data }; data is {} when the body is not JSON.
+    async function apiFull(path, options = {}) {
+      const res = await fetch(path, options);
+      let data = {};
+      try { data = await res.json(); } catch (e) { data = {}; }
+      return { ok: res.ok, status: res.status, data };
+    }
+
     function renderAgents() {
       const container = document.getElementById('agents-list');
       if (!container) return;
@@ -1144,16 +1154,14 @@
 
     async function updateCurrentTask(status) {
       if (!currentTaskDetailId) return;
-      const res = await fetch(`/api/kanban/tasks/${encodeURIComponent(currentTaskDetailId)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
-      if (!res.ok) throw new Error('Task update failed');
+      await api(`/api/kanban/tasks/${encodeURIComponent(currentTaskDetailId)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }, 'Task update failed');
       await fetchLiveMetrics();
       closeTaskDetail();
     }
     async function unblockCurrentTask() {
       if (!currentTaskDetailId) return;
       try {
-        const res = await fetch(`/api/kanban/tasks/${encodeURIComponent(currentTaskDetailId)}/unblock`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: 'Unblocked from dashboard' }) });
-        if (!res.ok) throw new Error('Unblock failed');
+        await api(`/api/kanban/tasks/${encodeURIComponent(currentTaskDetailId)}/unblock`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: 'Unblocked from dashboard' }) }, 'Unblock failed');
         await fetchLiveMetrics(); closeTaskDetail();
       } catch (err) { alert(err.message); }
     }
@@ -1162,7 +1170,7 @@
     async function addTaskComment() {
       const input = document.getElementById('task-comment-input'); const comment = input?.value.trim();
       if (!comment || !currentTaskDetailId) return;
-      try { const res = await fetch(`/api/kanban/tasks/${encodeURIComponent(currentTaskDetailId)}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ comment }) }); if (!res.ok) throw new Error('Comment failed'); input.value = ''; alert('Comment added.'); } catch (err) { alert(err.message); }
+      try { await api(`/api/kanban/tasks/${encodeURIComponent(currentTaskDetailId)}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ comment }) }, 'Comment failed'); input.value = ''; alert('Comment added.'); } catch (err) { alert(err.message); }
     }
     function openTaskWorkspaceFiles() {
       closeTaskDetail();
@@ -1173,7 +1181,7 @@
       const task = liveKanbanTasks.find(t => t.id === currentTaskDetailId); if (!task) return;
       const title = prompt('Task title', task.title); if (!title?.trim()) return;
       const body = prompt('Task details', task.description || task.body || '');
-      fetch(`/api/kanban/tasks/${encodeURIComponent(task.id)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title.trim(), body: body || '' }) }).then(async r => { if (!r.ok) throw new Error('Task edit failed'); await fetchLiveMetrics(); openTaskDetail(task.id); }).catch(err => alert(err.message));
+      api(`/api/kanban/tasks/${encodeURIComponent(task.id)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title.trim(), body: body || '' }) }, 'Task edit failed').then(async () => { await fetchLiveMetrics(); openTaskDetail(task.id); }).catch(err => alert(err.message));
     }
 
     function openTaskDetail(id) {
@@ -1297,7 +1305,7 @@
       const col = kanbanColumns.find(c => c.id === id);
       if (!confirm(`Delete ${tasks.length} task(s) from "${col?.label || id}"? This cannot be undone.`)) return;
       try {
-        const results = await Promise.all(tasks.map(t => fetch(`/api/kanban/tasks/${encodeURIComponent(t.id)}`, { method: 'DELETE' })));
+        const results = await Promise.all(tasks.map(t => apiFull(`/api/kanban/tasks/${encodeURIComponent(t.id)}`, { method: 'DELETE' })));
         if (results.some(r => !r.ok)) throw new Error('One or more tasks failed to delete');
         await fetchLiveMetrics();
         renderKanbanView();
@@ -1317,8 +1325,7 @@
       if (!task || task.status === status) return;
       const oldStatus = task.status; task.status = status; renderKanbanView();
       try {
-        const res = await fetch(`/api/kanban/tasks/${encodeURIComponent(id)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
-        if (!res.ok) throw new Error('Task status update failed');
+        await api(`/api/kanban/tasks/${encodeURIComponent(id)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }, 'Task status update failed');
         await fetchLiveMetrics();
       } catch (err) {
         task.status = oldStatus; renderKanbanView(); alert('Move failed: ' + err.message);
@@ -1487,11 +1494,10 @@
       const button = document.querySelector(`[data-run-schedule="${id}"]`);
       if (button) button.disabled = true;
       try {
-        const res = await fetch(`/api/schedules/${id}/run`, { method: 'POST' });
-        const data = await res.json().catch(() => ({}));
-        if (res.status === 202 && data.state === 'queued') {
+        const { status, data } = await apiFull(`/api/schedules/${id}/run`, { method: 'POST' });
+        if (status === 202 && data.state === 'queued') {
           alert('Schedule queued. Output akan dikirim Telegram setelah agent selesai.');
-        } else if (res.status === 409 && data.state === 'already_running') {
+        } else if (status === 409 && data.state === 'already_running') {
           alert('Schedule masih berjalan. Tunggu output atau cek log run.');
         } else {
           throw new Error(data.error || data.message || 'Failed to trigger schedule');
@@ -1507,8 +1513,8 @@
     async function toggleSchedulePause(id, isCurrentlyEnabled) {
       const action = isCurrentlyEnabled ? 'pause' : 'resume';
       try {
-        const res = await fetch(`/api/schedules/${id}/${action}`, { method: 'POST' });
-        if (res.ok) {
+        const { ok } = await apiFull(`/api/schedules/${id}/${action}`, { method: 'POST' });
+        if (ok) {
           await fetchSchedules();
         } else {
           alert(`Failed to ${action} schedule`);
@@ -1521,8 +1527,8 @@
     async function deleteScheduleJob(id) {
       if (!confirm(`Hapus jadwal cron ${id}?`)) return;
       try {
-        const res = await fetch(`/api/schedules/${id}`, { method: 'DELETE' });
-        if (res.ok) {
+        const { ok } = await apiFull(`/api/schedules/${id}`, { method: 'DELETE' });
+        if (ok) {
           await fetchSchedules();
         } else {
           alert('Failed to delete schedule');
@@ -1704,13 +1710,12 @@
       }
 
       try {
-        const res = await fetch(`/api/schedules/${currentEditScheduleId}`, {
+        const { ok, data } = await apiFull(`/api/schedules/${currentEditScheduleId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, schedule, deliver, recipient_agent, prompt, enabled })
         });
-        const data = await res.json();
-        if (res.ok && data.success) {
+        if (ok && data.success) {
           alert('Schedule configuration saved successfully');
           await fetchSchedules();
           closeEditSchedule();
@@ -1729,13 +1734,12 @@
       const reasoning_effort = document.getElementById('edit-sched-reasoning-select')?.value;
 
       try {
-        const res = await fetch(`/api/schedules/${currentEditScheduleId}`, {
+        const { ok, data } = await apiFull(`/api/schedules/${currentEditScheduleId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ provider, model, reasoning_effort })
         });
-        const data = await res.json();
-        if (res.ok && data.success) {
+        if (ok && data.success) {
           alert('Model configuration saved successfully');
           await fetchSchedules();
           closeEditSchedule();
@@ -3517,9 +3521,8 @@ ${escapeHtml(m.content || '(No output returned)')}
       const button = document.getElementById('run-ready-tasks-btn');
       if (button) button.disabled = true;
       try {
-        const res = await fetch('/api/kanban/dispatch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error || 'Dispatch failed');
+        const { ok, data } = await apiFull('/api/kanban/dispatch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+        if (!ok || !data.success) throw new Error(data.error || 'Dispatch failed');
         alert('Ready tasks dispatched.');
         await fetchLiveMetrics();
       } catch (err) {
@@ -3553,11 +3556,10 @@ ${escapeHtml(m.content || '(No output returned)')}
       submit.disabled = true;
       error.classList.add('hidden');
       try {
-        const res = await fetch('/api/kanban/tasks', {
+        const { ok, data } = await apiFull('/api/kanban/tasks', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error || 'Task creation failed');
+        if (!ok || !data.success) throw new Error(data.error || 'Task creation failed');
         document.getElementById('new-kanban-task-form').reset();
         await fetchLiveMetrics();
         switchNavByName('Kanban');
