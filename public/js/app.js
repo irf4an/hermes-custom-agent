@@ -1248,65 +1248,6 @@
       }
     }
 
-    function renderKanbanView() {
-      const filterAssignee = (document.getElementById('kanban-assignee-filter')?.value || 'all').toLowerCase();
-      const searchQuery = (document.getElementById('kanban-search')?.value || '').toLowerCase();
-
-      const filtered = liveKanbanTasks.filter(t => {
-        const matchesAssignee = filterAssignee === 'all' || t.assignee.toLowerCase() === filterAssignee;
-        const matchesSearch = !searchQuery || t.title.toLowerCase().includes(searchQuery) || (t.result && t.result.toLowerCase().includes(searchQuery)) || (t.description && t.description.toLowerCase().includes(searchQuery));
-        return matchesAssignee && matchesSearch;
-      });
-
-      const cols = {
-        backlog: filtered.filter(t => t.status === 'backlog'),
-        ready: filtered.filter(t => t.status === 'ready'),
-        inprogress: filtered.filter(t => t.status === 'in_progress'),
-        done: filtered.filter(t => t.status === 'done'),
-      };
-
-      document.getElementById('count-backlog').textContent = cols.backlog.length;
-      document.getElementById('count-ready').textContent = cols.ready.length;
-      document.getElementById('count-inprogress').textContent = cols.inprogress.length;
-      document.getElementById('count-done').textContent = cols.done.length;
-
-      function renderCard(t) {
-        return `
-          <div onclick="openTaskDetail('${t.id}')" class="bg-white border border-slate-200 rounded-lg p-3.5 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col gap-2">
-            <div>
-              <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                <span class="bg-blue-50 text-blue-600 border border-blue-200/80 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded leading-none">${t.priority}</span>
-                <h4 class="text-xs font-semibold text-slate-900 leading-snug flex-1">${t.title}</h4>
-              </div>
-              
-              <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-1">RESULT</div>
-              <div class="bg-slate-50 border border-slate-100 rounded p-2 text-[11px] text-slate-600 font-mono leading-relaxed line-clamp-3">
-                ${t.result}
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-2 border-t border-slate-100 mt-1">
-              <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 text-[10px] font-medium px-2 py-0.5 rounded-full">
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                <span>${t.assignee}</span>
-              </span>
-              <span class="inline-flex items-center gap-1 text-[11px] text-slate-400">
-                <i data-lucide="message-square" class="w-3 h-3"></i>
-                <span class="font-mono">${t.counter}</span>
-              </span>
-            </div>
-          </div>
-        `;
-      }
-
-      document.getElementById('kanban-col-backlog').innerHTML = cols.backlog.map(renderCard).join('') || '<div class="text-xs text-slate-400 text-center py-8">No tasks in backlog</div>';
-      document.getElementById('kanban-col-ready').innerHTML = cols.ready.map(renderCard).join('') || '<div class="text-xs text-slate-400 text-center py-8">No ready tasks</div>';
-      document.getElementById('kanban-col-inprogress').innerHTML = cols.inprogress.map(renderCard).join('') || '<div class="text-xs text-slate-400 text-center py-8">No active tasks</div>';
-      document.getElementById('kanban-col-done').innerHTML = cols.done.map(renderCard).join('') || '<div class="text-xs text-slate-400 text-center py-8">No completed tasks</div>';
-
-      lucide.createIcons();
-    }
-
     const defaultKanbanColumns = [
       { id: 'backlog', label: 'Backlog', tone: 'slate', empty: 'No tasks in backlog' },
       { id: 'ready', label: 'Ready', tone: 'slate', empty: 'No ready tasks' },
@@ -4894,23 +4835,6 @@ ${escapeHtml(m.content || '(No output returned)')}
       if (emptyEl) emptyEl.classList.add('hidden');
       listEl.classList.remove('hidden');
       if (badgeEl) badgeEl.textContent = `[${sessions.length}]`;
-
-      function formatTimeAgo(ts) {
-        if (!ts) return 'recently';
-        const now = Date.now() / 1000;
-        const diff = Math.max(0, now - ts);
-        if (diff < 60) return 'just now';
-        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-        return `${Math.floor(diff / 86400)}d ago`;
-      }
-
-      function formatTokens(num) {
-        if (!num) return '0 tok';
-        if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M tok`;
-        if (num >= 1000) return `${Math.round(num / 1000)}k tok`;
-        return `${num} tok`;
-      }
 
       listEl.innerHTML = sessions.slice(0, 6).map(s => `
         <div class="py-2.5 px-3 hover:bg-slate-50 flex items-center justify-between gap-3 transition-colors cursor-pointer" onclick="openChatLogSessionFromDashboard('${s.id}', '${s.profile}')">
