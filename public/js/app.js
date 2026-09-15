@@ -4875,9 +4875,8 @@ ${escapeHtml(m.content || '(No output returned)')}
     async function fetchLiveMetrics() {
       // 1. Sessions data (Hermes SQLite)
       try {
-        const res = await fetch('/api/sessions/overview');
-        if (res.ok) {
-          const sData = await res.json();
+        const sData = await api('/api/sessions/overview', {}, 'Gagal memuat ringkasan sesi');
+        {
           globalSessionsData = sData;
           if (sData.stats) {
             const activeEl = document.getElementById('metric-sessions');
@@ -4893,9 +4892,8 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       // 2. Channels data (Hermes Channels)
       try {
-        const res = await fetch('/api/channels/overview');
-        if (res.ok) {
-          const cData = await res.json();
+        const cData = await api('/api/channels/overview', {}, 'Gagal memuat ringkasan channels');
+        {
           if (cData.stats) {
             const chanEl = document.getElementById('metric-channels');
             const chanSub = document.getElementById('metric-channels-sub');
@@ -4923,9 +4921,8 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       // 3. Skills data (Hermes skills catalog)
       try {
-        const res = await fetch('/api/skills');
-        if (res.ok) {
-          const skData = await res.json();
+        const skData = await api('/api/skills', {}, 'Gagal memuat katalog skills');
+        {
           if (skData.stats) {
             const skEl = document.getElementById('metric-skills');
             const skSub = document.getElementById('metric-skills-sub');
@@ -4944,9 +4941,8 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       // 4. Models data (Upstream 9router & OpenCode)
       try {
-        const res = await fetch('/api/models/overview');
-        if (res.ok) {
-          const mData = await res.json();
+        const mData = await api('/api/models/overview', {}, 'Gagal memuat ringkasan model');
+        {
           if (mData.stats) {
             const provEl = document.getElementById('metric-providers');
             const provSub = document.getElementById('metric-providers-sub');
@@ -4960,9 +4956,8 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       // 5. Profiles data
       try {
-        const res = await fetch('/api/profiles');
-        if (res.ok) {
-          const data = await res.json();
+        const data = await api('/api/profiles', {}, 'Gagal memuat daftar agent');
+        {
           const profiles = data.profiles || [];
           globalProfiles = profiles;
 
@@ -4985,9 +4980,8 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       // Kanban data
       try {
-        const r = await fetch('/api/kanban');
-        if (r.ok) {
-          const d = await r.json();
+        const d = await api('/api/kanban', {}, 'Gagal memuat data kanban');
+        {
           const tasks = d.tasks || [];
           if (tasks.length > 0) {
             liveKanbanTasks = tasks.map(normalizeKanbanTask);
@@ -5023,9 +5017,8 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       // Schedule data from Hermes Cron API
       try {
-        const sr = await fetch('/api/schedules');
-        if (sr.ok) {
-          const sd = await sr.json();
+        const sd = await api('/api/schedules', {}, 'Gagal memuat jadwal');
+        {
           const schedules = sd.schedules || [];
           if (schedules.length > 0) {
             liveScheduleJobs = schedules;
