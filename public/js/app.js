@@ -2109,9 +2109,8 @@
       titleEl.textContent = `${uppercaseName} / FILES`;
 
       try {
-        const res = await fetch(`/api/agent-docs?agent=${agentId}`);
-        if (res.ok) {
-          const data = await res.json();
+        const { ok: docsOk, data } = await apiFull(`/api/agent-docs?agent=${agentId}`);
+        if (docsOk) {
           currentDocsData = data;
           basePathEl.textContent = data.basePath || (agentId === 'default' ? '~/.hermes' : `~/.hermes/profiles/${agentId}`);
           renderDocsTree(data.docs);
@@ -2260,9 +2259,8 @@
       setupDocsEditorListeners();
 
       try {
-        const res = await fetch(`/api/agent-doc-content?agent=${currentDocsAgent}&path=${encodeURIComponent(relPath)}`);
-        if (res.ok) {
-          const d = await res.json();
+        const { ok: docOk, data: d } = await apiFull(`/api/agent-doc-content?agent=${currentDocsAgent}&path=${encodeURIComponent(relPath)}`);
+        if (docOk) {
           const kb = (d.size / 1024).toFixed(1);
           metaEl.textContent = `${kb} KB`;
           docsOriginalContent = d.content || '';
@@ -2354,7 +2352,7 @@
       lucide.createIcons();
 
       try {
-        const res = await fetch('/api/agent-doc-content', {
+        const { ok: docSaveOk, data } = await apiFull('/api/agent-doc-content', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2364,8 +2362,7 @@
           })
         });
 
-        const data = await res.json();
-        if (res.ok && data.success) {
+        if (docSaveOk && data.success) {
           docsOriginalContent = newContent;
           if (viewEl) viewEl.textContent = newContent || '(Empty file)';
           if (metaEl && data.size !== undefined) {
@@ -2770,13 +2767,12 @@
       if (!confirm(`Hapus berkas "${name}" secara permanen dari storage VPS?`)) return;
 
       try {
-        const res = await fetch('/api/drive/file', {
+        const { ok: driveDelOk, data } = await apiFull('/api/drive/file', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: fileId })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!driveDelOk || !data.success) {
           alert('Gagal menghapus berkas: ' + (data.error || 'Terjadi kesalahan'));
           return;
         }
@@ -3325,9 +3321,8 @@ ${escapeHtml(m.content || '(No output returned)')}
 
       try {
         const url = `/api/chat-logs/sessions/${sessionId}${profile ? '?profile=' + profile : ''}`;
-        const res = await fetch(url, { method: 'DELETE' });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        const { ok: sessDelOk, data } = await apiFull(url, { method: 'DELETE' });
+        if (!sessDelOk || !data.success) {
           alert('Gagal menghapus sesi: ' + (data.error || 'Unknown error'));
           return;
         }
@@ -3371,13 +3366,12 @@ ${escapeHtml(m.content || '(No output returned)')}
       }
 
       try {
-        const res = await fetch('/api/chat-logs/sessions/prune-inactive', {
+        const { ok: pruneOk, data } = await apiFull('/api/chat-logs/sessions/prune-inactive', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ profile: currentChatLogsProfile, type: currentChatLogsType })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        if (!pruneOk || !data.success) {
           alert('Gagal membersihkan sesi: ' + (data.error || 'Unknown error'));
           return;
         }
