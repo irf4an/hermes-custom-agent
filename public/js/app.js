@@ -1470,9 +1470,8 @@
 
     async function fetchSchedules() {
       try {
-        const res = await fetch('/api/schedules');
-        if (res.ok) {
-          const d = await res.json();
+        const d = await api('/api/schedules', {}, 'Gagal memuat jadwal');
+        {
           if (Array.isArray(d.schedules)) {
             liveScheduleJobs = d.schedules;
             renderScheduleView();
@@ -2592,9 +2591,8 @@
       }
 
       try {
-        const res = await fetch('/api/drive/deliverables');
-        if (res.ok) {
-          const data = await res.json();
+        const data = await api('/api/drive/deliverables', {}, 'Gagal memuat drive');
+        {
           driveDeliverablesData = data.deliverables || [];
           if (data.rootFolder) driveRootFolder = data.rootFolder;
         }
@@ -3004,9 +3002,8 @@
       }
 
       try {
-        const res = await fetch(`/api/chat-logs/sessions?limit=500`);
-        if (res.ok) {
-          const data = await res.json();
+        const data = await api(`/api/chat-logs/sessions?limit=500`, {}, 'Gagal memuat chat logs');
+        {
           chatLogsSessionsData = data.sessions || [];
 
           updateChatLogsMetrics();
@@ -3199,9 +3196,7 @@
 
       try {
         const url = `/api/chat-logs/sessions/${sessionId}${profileHint ? '?profile=' + profileHint : ''}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Session messages not found');
-        const data = await res.json();
+        const data = await api(url, {}, 'Session messages not found');
         renderChatLogMessages(data.session, data.messages);
       } catch (err) {
         if (streamEl) {
@@ -5085,8 +5080,7 @@ ${escapeHtml(m.content || '(No output returned)')}
     async function loadOfficeView() {
       try {
         updateOfficeToolsToggleBtn();
-        const res = await fetch('/api/office/agents');
-        const data = await res.json();
+        const data = await api('/api/office/agents', {}, 'Gagal memuat daftar office agents');
         if (data.success && data.agents) {
           officeAgents = data.agents;
           renderOfficeSidebar();
@@ -5279,8 +5273,7 @@ ${escapeHtml(m.content || '(No output returned)')}
       if (!select) return;
 
       try {
-        const res = await fetch(`/api/office/sessions?agent=${agentId}`);
-        const data = await res.json();
+        const data = await api(`/api/office/sessions?agent=${agentId}`, {}, 'Gagal memuat sesi office');
         if (data.success && data.sessions) {
           let optHtml = `<option value="">Current / Latest</option>`;
           data.sessions.forEach(s => {
@@ -5732,9 +5725,7 @@ ${escapeHtml(m.content || '(No output returned)')}
     async function loadObsidianGraphView(forceReload = false) {
       try {
         if (!graphData || forceReload) {
-          const res = await fetch('/api/graph');
-          if (!res.ok) throw new Error('Gagal mengambil data graph');
-          graphData = await res.json();
+          graphData = await api('/api/graph', {}, 'Gagal mengambil data graph');
         }
 
         if (graphData && graphData.stats) {
