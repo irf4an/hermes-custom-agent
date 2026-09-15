@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" fill="none">
+  <defs>
+    <linearGradient id="vera-grad" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <radialGradient id="vera-glow" cx="64" cy="64" r="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background Base & Glow -->
+  <circle cx="64" cy="64" r="56" fill="#0b1120" stroke="#1e293b" stroke-width="2"/>
+  <circle cx="64" cy="64" r="54" fill="url(#vera-glow)"/>
+
+  <!-- Outer Yield Diamond -->
+  <polygon points="64,14 110,64 64,114 18,64" stroke="url(#vera-grad)" stroke-width="2.5" stroke-linejoin="round" fill="rgba(16, 185, 129, 0.08)"/>
+
+  <!-- Inner Growth Lattice -->
+  <polygon points="64,28 96,64 64,100 32,64" stroke="#10b981" stroke-width="1.2" stroke-dasharray="3 3" fill="none" opacity="0.6"/>
+
+  <!-- Financial Yield Vectors (Upward Surge) -->
+  <path d="M 40,78 L 54,64 L 64,72 L 86,46" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Arrow Head -->
+  <polyline points="74,46 86,46 86,58" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Center Target Core -->
+  <circle cx="86" cy="46" r="3.5" fill="#34d399"/>
+  <circle cx="64" cy="72" r="2.5" fill="#10b981"/>
+  <circle cx="54" cy="64" r="2.5" fill="#10b981"/>
+  <circle cx="40" cy="78" r="2.5" fill="#10b981"/>
+
+  <!-- Diamond Vertex Anchors -->
+  <circle cx="64" cy="14" r="3" fill="#34d399"/>
+  <circle cx="110" cy="64" r="3" fill="#34d399"/>
+  <circle cx="64" cy="114" r="3" fill="#34d399"/>
+  <circle cx="18" cy="64" r="3" fill="#34d399"/>
+</svg>

@@ -1,0 +1,246 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" fill="none" style="background:#020617; font-family:'JetBrains Mono', 'Fira Code', monospace;">
+  <defs>
+    <!-- Background Grid Pattern -->
+    <pattern id="arch-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+    </pattern>
+
+    <!-- Marker Arrowheads -->
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+    </marker>
+    <marker id="arrow-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#8b5cf6"/>
+    </marker>
+    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#06b6d4"/>
+    </marker>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- Background Grid -->
+  <rect width="100%" height="100%" fill="url(#arch-grid)"/>
+
+  <!-- TITLE & SUBTITLE -->
+  <text x="50" y="45" fill="#f8fafc" font-size="20" font-weight="700" letter-spacing="-0.02em">AHMAD IRFAN'S AUTONOMOUS MULTI-AGENT ARCHITECTURE</text>
+  <text x="50" y="68" fill="#64748b" font-size="11">SYSTEM TOPOLOGY • 9ROUTER PROXY • SULTAN OPS DECK • AUTONOMOUS INCOME ENGINE</text>
+  
+  <!-- TELEMETRY BADGE -->
+  <g transform="translate(930, 28)">
+    <rect width="220" height="42" rx="6" fill="#0b1120" stroke="#1e293b" stroke-width="1.5"/>
+    <circle cx="20" cy="21" r="5" fill="#10b981"/>
+    <text x="36" y="19" fill="#f8fafc" font-size="10" font-weight="700">VPS: 47.84.189.232</text>
+    <text x="36" y="32" fill="#94a3b8" font-size="9">RAM: 3.5GB + 4GB SWAP</text>
+  </g>
+
+  <!-- LAYER 1: BOUNDARIES -->
+  <!-- External Edge Systems -->
+  <rect x="40" y="95" width="220" height="640" rx="10" fill="rgba(15, 23, 42, 0.4)" stroke="#334155" stroke-dasharray="6 4" stroke-width="1.5"/>
+  <text x="55" y="120" fill="#94a3b8" font-size="10" font-weight="700" letter-spacing="0.05em">EDGE &amp; PLATFORMS</text>
+
+  <!-- Core Control & Proxy Boundary -->
+  <rect x="290" y="95" width="260" height="640" rx="10" fill="rgba(15, 23, 42, 0.4)" stroke="#f59e0b" stroke-dasharray="6 4" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="305" y="120" fill="#fbbf24" font-size="10" font-weight="700" letter-spacing="0.05em">ORCHESTRATION &amp; ROUTER</text>
+
+  <!-- Autonomous Sub-Agent Pipeline Boundary -->
+  <rect x="580" y="95" width="310" height="640" rx="10" fill="rgba(15, 23, 42, 0.4)" stroke="#06b6d4" stroke-dasharray="6 4" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="595" y="120" fill="#22d3ee" font-size="10" font-weight="700" letter-spacing="0.05em">INCOME SUB-AGENT PIPELINE</text>
+
+  <!-- Data & Persistence Boundary -->
+  <rect x="920" y="95" width="240" height="640" rx="10" fill="rgba(15, 23, 42, 0.4)" stroke="#a78bfa" stroke-dasharray="6 4" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="935" y="120" fill="#c4b5fd" font-size="10" font-weight="700" letter-spacing="0.05em">PERSISTENCE &amp; SYNC</text>
+
+  <!-- CONNECTOR PATHS (Drawn early for z-index layering) -->
+  <!-- Telegram -> Atlas -->
+  <path d="M 230,190 L 320,190" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow-amber)"/>
+  
+  <!-- Web User -> Dashboard -->
+  <path d="M 230,340 L 320,340" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow-amber)"/>
+
+  <!-- Atlas -> 9Router Proxy -->
+  <path d="M 420,230 L 420,470" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow-amber)"/>
+
+  <!-- Dashboard -> 9Router Proxy -->
+  <path d="M 420,380 L 420,470" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+  <!-- Atlas -> VERA -->
+  <path d="M 520,190 L 610,190" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-emerald)"/>
+
+  <!-- VERA -> MUSE -->
+  <path d="M 735,230 L 735,320" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrow-violet)"/>
+
+  <!-- MUSE -> PIXEL -->
+  <path d="M 735,380 L 735,470" stroke="#06b6d4" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+
+  <!-- PIXEL -> Video Platforms -->
+  <path d="M 610,510 L 230,510" stroke="#06b6d4" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+
+  <!-- Analytics Loop: PIXEL -> VERA -->
+  <path d="M 860,510 L 880,510 L 880,190 L 860,190" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow-emerald)"/>
+
+  <!-- Agents -> Kanban DB -->
+  <path d="M 860,350 L 950,350" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-violet)"/>
+
+  <!-- Atlas/System -> Obsidian Vault -->
+  <path d="M 520,620 L 950,620" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-violet)"/>
+
+  <!-- Obsidian -> GitHub -->
+  <path d="M 1060,590 L 1060,230 L 230,230" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow-slate)"/>
+
+  <!-- 9Router -> Antigravity Upstream -->
+  <path d="M 320,530 L 230,640" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-slate)"/>
+
+  <!-- NODES: LAYER 1 - EXTERNAL EDGE (X: 60, W: 170) -->
+  <!-- Telegram Bot -->
+  <g transform="translate(60, 160)">
+    <rect width="170" height="60" rx="6" fill="#0f172a"/>
+    <rect width="170" height="60" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="14" y="24" fill="#38bdf8" font-size="8" font-weight="700">INPUT INTERFACE</text>
+    <text x="14" y="42" fill="#f8fafc" font-size="12" font-weight="700">@Leaderkgo_bot</text>
+    <text x="14" y="52" fill="#94a3b8" font-size="8">Telegram Gateway</text>
+  </g>
+
+  <!-- Web Browser Ops Deck -->
+  <g transform="translate(60, 310)">
+    <rect width="170" height="60" rx="6" fill="#0f172a"/>
+    <rect width="170" height="60" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="14" y="24" fill="#fbbf24" font-size="8" font-weight="700">OPERATOR BROWSER</text>
+    <text x="14" y="42" fill="#f8fafc" font-size="12" font-weight="700">Mission Control</text>
+    <text x="14" y="52" fill="#94a3b8" font-size="8">Port :3000 Web UI</text>
+  </g>
+
+  <!-- Social Video Platforms -->
+  <g transform="translate(60, 470)">
+    <rect width="170" height="80" rx="6" fill="#0f172a"/>
+    <rect width="170" height="80" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#06b6d4" stroke-width="1.5"/>
+    <text x="14" y="24" fill="#22d3ee" font-size="8" font-weight="700">DISTRIBUTION TARGETS</text>
+    <text x="14" y="42" fill="#f8fafc" font-size="11" font-weight="700">• YouTube Shorts</text>
+    <text x="14" y="56" fill="#f8fafc" font-size="11" font-weight="700">• TikTok API</text>
+    <text x="14" y="70" fill="#f8fafc" font-size="11" font-weight="700">• Instagram Reels</text>
+  </g>
+
+  <!-- Cloud LLMs Antigravity -->
+  <g transform="translate(60, 610)">
+    <rect width="170" height="60" rx="6" fill="#0f172a"/>
+    <rect width="170" height="60" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#64748b" stroke-width="1.5"/>
+    <text x="14" y="24" fill="#94a3b8" font-size="8" font-weight="700">AI INFERENCE UPSTREAM</text>
+    <text x="14" y="42" fill="#f8fafc" font-size="12" font-weight="700">Antigravity Proxy</text>
+    <text x="14" y="52" fill="#94a3b8" font-size="8">Sonnet 4.6 / Gemini 3.7</text>
+  </g>
+
+  <!-- NODES: LAYER 2 - CORE ORCHESTRATION (X: 320, W: 200) -->
+  <!-- ATLAS ORCHESTRATOR -->
+  <g transform="translate(320, 150)">
+    <rect width="200" height="80" rx="6" fill="#0f172a"/>
+    <rect width="200" height="80" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#f59e0b" stroke-width="2"/>
+    <circle cx="180" cy="20" r="4" fill="#f59e0b"/>
+    <text x="14" y="24" fill="#fbbf24" font-size="9" font-weight="700">LEAD ORCHESTRATOR</text>
+    <text x="14" y="45" fill="#f8fafc" font-size="14" font-weight="800">ATLAS</text>
+    <text x="14" y="60" fill="#94a3b8" font-size="8.5">Model: Claude Sonnet 4.6</text>
+    <text x="14" y="71" fill="#fbbf24" font-size="8">Delegation &amp; Troubleshooting</text>
+  </g>
+
+  <!-- MISSION CONTROL SERVER -->
+  <g transform="translate(320, 300)">
+    <rect width="200" height="80" rx="6" fill="#0f172a"/>
+    <rect width="200" height="80" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="14" y="24" fill="#38bdf8" font-size="9" font-weight="700">NODE.JS BACKEND</text>
+    <text x="14" y="45" fill="#f8fafc" font-size="13" font-weight="700">Sultan Ops Deck</text>
+    <text x="14" y="60" fill="#94a3b8" font-size="8.5">Express • PM2 Managed</text>
+    <text x="14" y="71" fill="#38bdf8" font-size="8">Kanban &amp; Vault APIs</text>
+  </g>
+
+  <!-- 9ROUTER REVERSE PROXY -->
+  <g transform="translate(320, 470)">
+    <rect width="200" height="75" rx="6" fill="#0f172a"/>
+    <rect width="200" height="75" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#10b981" stroke-width="1.5"/>
+    <text x="14" y="24" fill="#34d399" font-size="9" font-weight="700">LIGHTWEIGHT AI PROXY</text>
+    <text x="14" y="44" fill="#f8fafc" font-size="13" font-weight="700">9router v0.5.69</text>
+    <text x="14" y="58" fill="#94a3b8" font-size="8.5">Port 20128 • Low Memory</text>
+    <text x="14" y="69" fill="#34d399" font-size="8">Model Failover &amp; Routing</text>
+  </g>
+
+  <!-- NODES: LAYER 3 - SUB-AGENTS PIPELINE (X: 610, W: 250) -->
+  <!-- VERA -->
+  <g transform="translate(610, 150)">
+    <rect width="250" height="80" rx="6" fill="#0f172a"/>
+    <rect width="250" height="80" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#10b981" stroke-width="2"/>
+    <circle cx="230" cy="20" r="4" fill="#10b981"/>
+    <text x="14" y="24" fill="#34d399" font-size="9" font-weight="700">REVENUE &amp; AFFILIATE STRATEGIST</text>
+    <text x="14" y="45" fill="#f8fafc" font-size="14" font-weight="800">VERA</text>
+    <text x="14" y="60" fill="#94a3b8" font-size="8.5">Offer Research • Unit Economics</text>
+    <text x="14" y="71" fill="#34d399" font-size="8">Campaign Briefing → MUSE</text>
+  </g>
+
+  <!-- MUSE -->
+  <g transform="translate(610, 300)">
+    <rect width="250" height="80" rx="6" fill="#0f172a"/>
+    <rect width="250" height="80" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="#8b5cf6" stroke-width="2"/>
+    <circle cx="230" cy="20" r="4" fill="#8b5cf6"/>
+    <text x="14" y="24" fill="#a78bfa" font-size="9" font-weight="700">CONTENT PRODUCER &amp; CLIPPER</text>
+    <text x="14" y="45" fill="#f8fafc" font-size="14" font-weight="800">MUSE</text>
+    <text x="14" y="60" fill="#94a3b8" font-size="8.5">yt-dlp • ffmpeg • 9:16 Video Cuts</text>
+    <text x="14" y="71" fill="#a78bfa" font-size="8">Viral Hooks &amp; Burned-in Subtitles</text>
+  </g>
+
+  <!-- PIXEL -->
+  <g transform="translate(610, 470)">
+    <rect width="250" height="80" rx="6" fill="#0f172a"/>
+    <rect width="250" height="80" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#06b6d4" stroke-width="2"/>
+    <circle cx="230" cy="20" r="4" fill="#06b6d4"/>
+    <text x="14" y="24" fill="#22d3ee" font-size="9" font-weight="700">DISTRIBUTION &amp; AUTOMATION</text>
+    <text x="14" y="45" fill="#f8fafc" font-size="14" font-weight="800">PIXEL</text>
+    <text x="14" y="60" fill="#94a3b8" font-size="8.5">Auto-Upload • Queue Scheduling</text>
+    <text x="14" y="71" fill="#22d3ee" font-size="8">Verification &amp; Analytics Pull</text>
+  </g>
+
+  <!-- NODES: LAYER 4 - PERSISTENCE & SYNC (X: 950, W: 180) -->
+  <!-- KANBAN DB -->
+  <g transform="translate(950, 310)">
+    <rect width="180" height="80" rx="6" fill="#0f172a"/>
+    <rect width="180" height="80" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="14" y="24" fill="#c4b5fd" font-size="9" font-weight="700">SHARED WORK STATE</text>
+    <text x="14" y="45" fill="#f8fafc" font-size="13" font-weight="700">SQLite Kanban</text>
+    <text x="14" y="60" fill="#94a3b8" font-size="8.5">~/.hermes/kanban.db</text>
+    <text x="14" y="71" fill="#a78bfa" font-size="8">Task Pipeline Coordination</text>
+  </g>
+
+  <!-- OBSIDIAN VAULT -->
+  <g transform="translate(950, 570)">
+    <rect width="180" height="80" rx="6" fill="#0f172a"/>
+    <rect width="180" height="80" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#64748b" stroke-width="1.5"/>
+    <text x="14" y="24" fill="#94a3b8" font-size="9" font-weight="700">KNOWLEDGE BASE</text>
+    <text x="14" y="45" fill="#f8fafc" font-size="13" font-weight="700">Obsidian Vault</text>
+    <text x="14" y="60" fill="#94a3b8" font-size="8.5">/root/notes</text>
+    <text x="14" y="71" fill="#64748b" font-size="8">Git Sync → GitHub Repo</text>
+  </g>
+
+  <!-- LEGEND (Bottom bar outside boundaries) -->
+  <g transform="translate(50, 755)">
+    <rect width="1100" height="45" rx="6" fill="#0b1120" stroke="#1e293b" stroke-width="1"/>
+    
+    <!-- Legend Items -->
+    <circle cx="30" cy="22" r="5" fill="#f59e0b"/>
+    <text x="42" y="26" fill="#94a3b8" font-size="9">ATLAS (Orchestration)</text>
+
+    <circle cx="210" cy="22" r="5" fill="#10b981"/>
+    <text x="222" y="26" fill="#94a3b8" font-size="9">VERA (Revenue)</text>
+
+    <circle cx="350" cy="22" r="5" fill="#8b5cf6"/>
+    <text x="362" y="26" fill="#94a3b8" font-size="9">MUSE (Production)</text>
+
+    <circle cx="490" cy="22" r="5" fill="#06b6d4"/>
+    <text x="502" y="26" fill="#94a3b8" font-size="9">PIXEL (Distribution)</text>
+
+    <circle cx="640" cy="22" r="5" fill="#38bdf8"/>
+    <text x="652" y="26" fill="#94a3b8" font-size="9">Edge / Web Gateways</text>
+
+    <line x1="820" y1="22" x2="850" y2="22" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <text x="860" y="26" fill="#94a3b8" font-size="9">Analytics Feedback Loop</text>
+  </g>
+</svg>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sultan Ops Deck — Design System & Vector Assets</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ops-bg-root: #020617;
+      --ops-bg-card: #0b1120;
+      --ops-bg-surface: #0f172a;
+      --ops-bg-hover: #1e293b;
+      --ops-border-subtle: #1e293b;
+      --ops-border-active: #334155;
+      --ops-text-primary: #f8fafc;
+      --ops-text-secondary: #94a3b8;
+      --ops-text-muted: #64748b;
+      
+      --atlas-color: #f59e0b;
+      --atlas-light: #fbbf24;
+      --atlas-surface: rgba(245, 158, 11, 0.12);
+
+      --vera-color: #10b981;
+      --vera-light: #34d399;
+      --vera-surface: rgba(16, 185, 129, 0.12);
+
+      --muse-color: #8b5cf6;
+      --muse-light: #a78bfa;
+      --muse-surface: rgba(139, 92, 246, 0.12);
+
+      --pixel-color: #06b6d4;
+      --pixel-light: #22d3ee;
+      --pixel-surface: rgba(6, 182, 212, 0.12);
+
+      --zeta-color: #f43f5e;
+      --zeta-light: #fb7185;
+      --zeta-surface: rgba(244, 63, 94, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--ops-bg-root);
+      color: var(--ops-text-primary);
+      font-family: 'Inter', -apple-system, sans-serif;
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container { max-width: 1280px; width: 100%; }
+
+    /* TOP BAR */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--ops-border-subtle);
+      padding-bottom: 24px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .brand-logo svg { width: 26px; height: 26px; }
+
+    .brand-title h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ops-text-muted);
+    }
+
+    .header-pills {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      background: var(--ops-bg-surface);
+      border: 1px solid var(--ops-border-subtle);
+      color: var(--ops-text-secondary);
+    }
+    .pill.active { border-color: var(--pixel-color); color: var(--pixel-light); }
+
+    /* SECTION HEADER */
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::before {
+      content: "";
+      width: 4px;
+      height: 18px;
+      background: var(--pixel-color);
+      border-radius: 2px;
+    }
+
+    /* AGENT ROSTER GRID */
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+
+    .agent-card {
+      background: var(--ops-bg-card);
+      border: 1px solid var(--ops-border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--ops-border-active);
+    }
+
+    .agent-card.atlas { border-top: 3px solid var(--atlas-color); }
+    .agent-card.vera { border-top: 3px solid var(--vera-color); }
+    .agent-card.muse { border-top: 3px solid var(--muse-color); }
+    .agent-card.pixel { border-top: 3px solid var(--pixel-color); }
+    .agent-card.zeta { border-top: 3px solid var(--zeta-color); }
+
+    .agent-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .agent-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #020617;
+      border: 1px solid var(--ops-border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .agent-avatar img, .agent-avatar svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .agent-meta h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .agent-role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--ops-text-muted);
+      text-transform: uppercase;
+    }
+
+    .agent-desc {
+      font-size: 12.5px;
+      color: var(--ops-text-secondary);
+      line-height: 1.4;
+      margin-bottom: 14px;
+      min-height: 52px;
+    }
+
+    .agent-footer {
+      border-top: 1px solid var(--ops-border-subtle);
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .token-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .chip-atlas { background: var(--atlas-surface); color: var(--atlas-light); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .chip-vera { background: var(--vera-surface); color: var(--vera-light); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .chip-muse { background: var(--muse-surface); color: var(--muse-light); border: 1px solid rgba(139, 92, 246, 0.3); }
+    .chip-pixel { background: var(--pixel-surface); color: var(--pixel-light); border: 1px solid rgba(6, 182, 212, 0.3); }
+    .chip-zeta { background: var(--zeta-surface); color: var(--zeta-light); border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--vera-color);
+      box-shadow: 0 0 6px var(--vera-color);
+    }
+
+    /* DIAGRAM DISPLAY & TABS */
+    .tab-container {
+      background: var(--ops-bg-card);
+      border: 1px solid var(--ops-border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--ops-border-subtle);
+      background: var(--ops-bg-surface);
+      padding: 6px 12px;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--ops-text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--ops-bg-card);
+      color: var(--ops-text-primary);
+      border-color: var(--ops-border-subtle);
+      font-weight: 600;
+    }
+
+    .tab-content {
+      padding: 24px;
+      display: none;
+    }
+    .tab-content.active { display: block; }
+    .tab-content svg { width: 100%; height: auto; border-radius: 8px; }
+
+    /* TOKEN SPEC GRID */
+    .tokens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+
+    .token-box {
+      background: var(--ops-bg-card);
+      border: 1px solid var(--ops-border-subtle);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .token-box h4 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ops-text-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .color-swatch-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .swatch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+    }
+
+    .swatch-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ops-text-secondary);
+    }
+
+    .swatch-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .swatch-hex { color: var(--ops-text-muted); font-size: 11px; }
+
+    /* CODE EXPORT BLOCK */
+    .code-section {
+      background: var(--ops-bg-card);
+      border: 1px solid var(--ops-border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .code-header h4 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    pre {
+      background: #020617;
+      border: 1px solid var(--ops-border-subtle);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #38bdf8;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--ops-border-subtle);
+      padding-top: 20px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ops-text-muted);
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- HEADER -->
+    <header class="top-header">
+      <div class="brand-title">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1>Sultan Ops Deck Visual Identity &amp; Assets</h1>
+          <p>Multi-Agent Visual Tokens • SVG Architecture • Sub-Agent Assets Spec</p>
+        </div>
+      </div>
+      <div class="header-pills">
+        <div class="pill active">Google DESIGN.md Compliant</div>
+        <div class="pill">DTCG Tokens Ready</div>
+        <div class="pill">Tailwind Theme Ready</div>
+      </div>
+    </header>
+
+    <!-- SECTION: SUB-AGENT VISUAL MATRIX -->
+    <div class="section-title">Sub-Agent Visual Identity Matrix</div>
+    <div class="agent-grid">
+      
+      <!-- ATLAS -->
+      <div class="agent-card atlas">
+        <div class="agent-card-header">
+          <div class="agent-avatar">
+            <img src="assets/agents/atlas.svg" alt="ATLAS">
+          </div>
+          <div class="agent-meta">
+            <h3 style="color:var(--atlas-light);">ATLAS</h3>
+            <div class="agent-role">Lead Orchestrator</div>
+          </div>
+        </div>
+        <div class="agent-desc">Chief of AI Operations. Multi-agent delegation, ticket lifecycle, onboarding &amp; root-cause triage.</div>
+        <div class="agent-footer">
+          <span class="token-chip chip-atlas">#f59e0b</span>
+          <span class="status-dot"></span>
+        </div>
+      </div>
+
+      <!-- VERA -->
+      <div class="agent-card vera">
+        <div class="agent-card-header">
+          <div class="agent-avatar">
+            <img src="assets/agents/vera.svg" alt="VERA">
+          </div>
+          <div class="agent-meta">
+            <h3 style="color:var(--vera-light);">VERA</h3>
+            <div class="agent-role">Revenue Strategist</div>
+          </div>
+        </div>
+        <div class="agent-desc">Monetization, affiliate offer sourcing, unit economics, campaign briefing, and conversion loop tracking.</div>
+        <div class="agent-footer">
+          <span class="token-chip chip-vera">#10b981</span>
+          <span class="status-dot"></span>
+        </div>
+      </div>
+
+      <!-- MUSE -->
+      <div class="agent-card muse">
+        <div class="agent-card-header">
+          <div class="agent-avatar">
+            <img src="assets/agents/muse.svg" alt="MUSE">
+          </div>
+          <div class="agent-meta">
+            <h3 style="color:var(--muse-light);">MUSE</h3>
+            <div class="agent-role">Content Producer</div>
+          </div>
+        </div>
+        <div class="agent-desc">Vertical short-form video clipping (yt-dlp, ffmpeg), viral hook engineering, burned subtitles &amp; CTAs.</div>
+        <div class="agent-footer">
+          <span class="token-chip chip-muse">#8b5cf6</span>
+          <span class="status-dot"></span>
+        </div>
+      </div>
+
+      <!-- PIXEL -->
+      <div class="agent-card pixel">
+        <div class="agent-card-header">
+          <div class="agent-avatar">
+            <img src="assets/agents/pixel.svg" alt="PIXEL">
+          </div>
+          <div class="agent-meta">
+            <h3 style="color:var(--pixel-light);">PIXEL</h3>
+            <div class="agent-role">Distribution Engineer</div>
+          </div>
+        </div>
+        <div class="agent-desc">Automated multi-platform uploading (Shorts, TikTok, Reels), scheduling, audit verification &amp; metrics pull.</div>
+        <div class="agent-footer">
+          <span class="token-chip chip-pixel">#06b6d4</span>
+          <span class="status-dot"></span>
+        </div>
+      </div>
+
+      <!-- ZETA -->
+      <div class="agent-card zeta">
+        <div class="agent-card-header">
+          <div class="agent-avatar">
+            <img src="assets/agents/zeta.svg" alt="ZETA">
+          </div>
+          <div class="agent-meta">
+            <h3 style="color:var(--zeta-light);">ZETA</h3>
+            <div class="agent-role">System Intelligence</div>
+          </div>
+        </div>
+        <div class="agent-desc">Mission intelligence operative. Context telemetry, quiet system oversight, and tactical support.</div>
+        <div class="agent-footer">
+          <span class="token-chip chip-zeta">#f43f5e</span>
+          <span class="status-dot"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SECTION: INTERACTIVE ARCHITECTURE & PIPELINE DIAGRAMS -->
+    <div class="section-title">SVG Architecture &amp; Operations Pipelines</div>
+    <div class="tab-container">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('arch')">System Topology Diagram</button>
+        <button class="tab-btn" onclick="switchTab('pipe')">6-Step Autonomous Income Pipeline</button>
+      </div>
+
+      <div id="tab-arch" class="tab-content active">
+        <img src="assets/diagrams/system-architecture.svg" alt="System Architecture Diagram" style="width:100%; height:auto;">
+      </div>
+
+      <div id="tab-pipe" class="tab-content">
+        <img src="assets/diagrams/pipeline-flow.svg" alt="Autonomous Income Pipeline" style="width:100%; height:auto;">
+      </div>
+    </div>
+
+    <!-- SECTION: DESIGN TOKENS SPECIFICATION -->
+    <div class="section-title">Design Token Specifications</div>
+    <div class="tokens-grid">
+      
+      <!-- Base Palette -->
+      <div class="token-box">
+        <h4>Base Dark Canvas <span>Slate 950</span></h4>
+        <div class="color-swatch-list">
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#020617;"></div>bg-root</div>
+            <div class="swatch-hex">#020617</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#0b1120;"></div>bg-card</div>
+            <div class="swatch-hex">#0b1120</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#0f172a;"></div>bg-surface</div>
+            <div class="swatch-hex">#0f172a</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#1e293b;"></div>border-subtle</div>
+            <div class="swatch-hex">#1e293b</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent Tokens -->
+      <div class="token-box">
+        <h4>Sub-Agent Semantic Tokens</h4>
+        <div class="color-swatch-list">
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#f59e0b;"></div>agent-atlas</div>
+            <div class="swatch-hex">#f59e0b</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#10b981;"></div>agent-vera</div>
+            <div class="swatch-hex">#10b981</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#8b5cf6;"></div>agent-muse</div>
+            <div class="swatch-hex">#8b5cf6</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#06b6d4;"></div>agent-pixel</div>
+            <div class="swatch-hex">#06b6d4</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label"><div class="swatch-color" style="background:#f43f5e;"></div>agent-zeta</div>
+            <div class="swatch-hex">#f43f5e</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography & Radii -->
+      <div class="token-box">
+        <h4>Typography &amp; Layout</h4>
+        <div class="color-swatch-list">
+          <div class="swatch-row">
+            <div class="swatch-label">font-display</div>
+            <div class="swatch-hex">Plus Jakarta Sans</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label">font-sans</div>
+            <div class="swatch-hex">Inter</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label">font-mono</div>
+            <div class="swatch-hex">JetBrains Mono</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label">radius-card</div>
+            <div class="swatch-hex">12px</div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-label">grid-rhythm</div>
+            <div class="swatch-hex">8px base</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CODE EXPORT BLOCK -->
+    <div class="code-section">
+      <div class="code-header">
+        <h4>Integration Snippet: Quick CSS Variables Import</h4>
+        <span class="pill">theme.css</span>
+      </div>
+      <pre><code>/* Sultan Ops Standard Token Bindings */
+@import url('/assets/theme.css');
+
+.agent-atlas-card { border-top: 3px solid var(--agent-atlas-primary); background: var(--ops-bg-card); }
+.agent-vera-card  { border-top: 3px solid var(--agent-vera-primary);  background: var(--ops-bg-card); }
+.agent-muse-card  { border-top: 3px solid var(--agent-muse-primary);  background: var(--ops-bg-card); }
+.agent-pixel-card { border-top: 3px solid var(--agent-pixel-primary); background: var(--ops-bg-card); }
+.agent-zeta-card  { border-top: 3px solid var(--agent-zeta-primary);  background: var(--ops-bg-card); }</code></pre>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div>Sultan Ops Deck &bull; Visual Identity Standard</div>
+      <div>Designed &amp; Maintained by PIXEL (Distribution Engineer)</div>
+    </footer>
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      if (tab === 'arch') {
+        document.querySelector('.tab-bar button:nth-child(1)').classList.add('active');
+        document.getElementById('tab-arch').classList.add('active');
+      } else {
+        document.querySelector('.tab-bar button:nth-child(2)').classList.add('active');
+        document.getElementById('tab-pipe').classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>
