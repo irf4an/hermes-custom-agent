@@ -17,7 +17,7 @@ function loadConfig() {
   return {
     enabled: true,
     botToken: process.env.TELEGRAM_BOT_TOKEN || '',
-    chatId: '1110756552',
+    chatId: process.env.TELEGRAM_CHAT_ID || '',
     topics: {
       server_status: '',
       agent_execution: '',

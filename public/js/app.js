@@ -1085,7 +1085,7 @@
       priorityBadge.textContent = task.priority || 'P100';
       assigneeBadge.textContent = task.assignee || 'coder';
 
-      document.getElementById('task-detail-id').textContent = task.displayId || 't_06e5983d';
+      document.getElementById('task-detail-id').textContent = task.displayId || '—';
       document.getElementById('task-detail-title').textContent = task.title;
       document.getElementById('task-detail-subtitle').textContent = task.status === 'done' ? 'Completed.' : (task.status === 'blocked' ? 'Blocked — action required.' : (task.status === 'in_progress' ? 'In progress.' : 'Pending.'));
       
@@ -1094,7 +1094,7 @@
       document.getElementById('task-meta-assignee').textContent = task.assignee;
       document.getElementById('task-meta-priority').textContent = task.priority || 'P100';
       document.getElementById('task-meta-created').textContent = task.created || '2 months ago';
-      document.getElementById('task-meta-workspace').textContent = `~/.hermes/kanban/workspaces/${task.displayId || 't_06e5983d'}`;
+      document.getElementById('task-meta-workspace').textContent = `~/.hermes/kanban/workspaces/${task.displayId || '<id>'}`;
 
       // Update Tracking Status Timeline
       const timeAgo = task.created || '2 months ago';

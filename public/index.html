@@ -307,7 +307,7 @@
               <span class="badge-pill" id="pairing-pending">0</span>
             </div>
             <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span class="flex items-center gap-1.5"><i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-600"></i> Ahmad Irfan (ID: 1110756552)</span>
+              <span class="flex items-center gap-1.5"><i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-600"></i> Bot owner (Telegram pairing)</span>
               <span class="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Owner</span>
             </div>
           </div>
@@ -767,7 +767,7 @@
               <h4 class="text-xs font-bold text-slate-900">Direct Directory & Files</h4>
             </div>
             <div class="text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-700">
-              Profile Directory: <span id="edit-agent-adv-path">/root/.hermes/profiles/atlas</span>
+              Profile Directory: <span id="edit-agent-adv-path">~/.hermes/profiles/&lt;agent&gt;</span>
             </div>
             <button onclick="openDocsForCurrentEditAgent()" class="inline-flex items-center gap-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg shadow-2xs transition">
               <i data-lucide="folder-open" class="w-3.5 h-3.5 text-amber-500"></i>
@@ -1181,7 +1181,7 @@
 
             <!-- Bottom Base Path -->
             <div class="p-2.5 border-t border-slate-100 bg-slate-50/60 text-[11px] font-mono text-slate-500 truncate flex items-center justify-between">
-              <span class="truncate" id="docs-base-path">/root/.hermes</span>
+              <span class="truncate" id="docs-base-path">~</span>
               <button onclick="copyDocsBasePath()" class="p-0.5 hover:text-slate-800 text-slate-400 ml-1 flex-shrink-0" title="Copy path">
                 <i data-lucide="copy" class="w-3 h-3"></i>
               </button>
@@ -1262,7 +1262,7 @@
                   <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-emerald-600"></i>
                   <span>Local VPS Storage Active</span>
                 </span>
-                <span class="text-xs text-slate-400">· Root: <code class="text-[11px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">/root/workspace/</code></span>
+                <span class="text-xs text-slate-400">· Root: <code class="text-[11px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">~/workspace/</code></span>
               </div>
               <h2 class="text-lg font-bold text-slate-900">Agent Workspace Drive (Local Storage)</h2>
               <p class="text-xs text-slate-500 max-w-2xl">
@@ -1297,7 +1297,7 @@
             </div>
             <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
               <div class="text-[11px] font-medium text-slate-500">Active Agent Output Path</div>
-              <div class="text-xs font-mono font-semibold text-slate-700 mt-1 truncate" id="drive-ribbon-path">/root/workspace/atlas/</div>
+              <div class="text-xs font-mono font-semibold text-slate-700 mt-1 truncate" id="drive-ribbon-path">~/workspace/</div>
             </div>
           </div>
         </div>
@@ -1324,7 +1324,7 @@
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
                   <h4 class="text-sm font-bold text-slate-900 truncate" id="drive-current-agent-title">Agent / Outputs</h4>
-                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 font-mono text-slate-600" id="drive-current-agent-folder-path">/root/workspace/atlas/</span>
+                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 font-mono text-slate-600" id="drive-current-agent-folder-path">~/workspace/</span>
                 </div>
                 <p class="text-[11.5px] text-slate-400" id="drive-current-agent-desc">Folder penyimpanan output agent di storage lokal VPS.</p>
               </div>
@@ -1924,7 +1924,7 @@
                     </span>
                   </div>
                   <div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono truncate">
-                    <span id="office-header-role" class="truncate">Intelligence Operative</span>
+                    <span id="office-header-role" class="truncate">Agent</span>
                     <span class="text-slate-300">·</span>
                     <span id="office-header-model" class="text-slate-600 truncate">ag/gemini-3.8-flash-high</span>
                   </div>
@@ -2127,7 +2127,7 @@
             <div class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
               <!-- Location / Path Box -->
               <div id="inspector-path-box" class="p-2 bg-slate-50 rounded-lg border border-slate-200/70 font-mono text-[10.5px] text-slate-600 break-all">
-                /root/notes/...
+                ~/notes/...
               </div>
 
               <!-- Connected Links -->
@@ -2188,7 +2188,7 @@
                 <h4 class="text-xs font-bold text-slate-900">Obsidian Vault Notes</h4>
                 <span id="vault-notes-count-badge" class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">0 notes</span>
               </div>
-              <div class="text-[10.5px] text-slate-400 font-mono truncate">~/notes (irf4an/obsidian-notes)</div>
+              <div class="text-[10.5px] text-slate-400 font-mono truncate">Local Obsidian vault</div>
             </div>
           </div>
           <button onclick="closeVaultNotesModal()" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer rounded hover:bg-slate-200/50">
@@ -2351,8 +2351,8 @@
           <!-- Target Chat ID -->
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Target Chat ID / Group ID</label>
-            <input type="text" id="tg-settings-chat-id" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-blue-500" placeholder="1110756552">
-            <p class="text-[10px] text-slate-400 mt-1">ID user atau forum group supergroup tujuan (misal: 1110756552).</p>
+            <input type="text" id="tg-settings-chat-id" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-blue-500" placeholder="123456789">
+            <p class="text-[10px] text-slate-400 mt-1">ID user atau forum group supergroup tujuan (misal: 123456789).</p>
           </div>
 
           <!-- Bot Token Override (Optional) -->
@@ -2590,7 +2590,7 @@
               <span id="task-detail-priority-badge" class="bg-sky-100 text-sky-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">P100</span>
               <span id="task-detail-assignee-badge" class="bg-slate-100 text-slate-700 text-xs font-medium px-2.5 py-0.5 rounded-full">coder</span>
               <span class="inline-flex items-center gap-1 font-mono text-xs text-slate-400">
-                <span id="task-detail-id">t_06e5983d</span>
+                <span id="task-detail-id">—</span>
                 <button onclick="copyTaskId()" class="hover:text-slate-600 p-0.5" title="Copy Task ID">
                   <i data-lucide="copy" class="w-3 h-3"></i>
                 </button>
@@ -2598,8 +2598,8 @@
             </div>
 
             <!-- Title -->
-            <h2 id="task-detail-title" class="text-lg md:text-xl font-bold text-slate-900 leading-snug">Technical feasibility — Multi-Agent Google Sheets Dashboard</h2>
-            <div id="task-detail-subtitle" class="text-xs text-slate-500 mt-1">Completed.</div>
+            <h2 id="task-detail-title" class="text-lg md:text-xl font-bold text-slate-900 leading-snug">Task title</h2>
+            <div id="task-detail-subtitle" class="text-xs text-slate-500 mt-1"></div>
           </div>
 
           <!-- Circular Close Button -->
@@ -2666,7 +2666,7 @@
                       <div><span class="text-slate-400">Runtime:</span> 42.8s wall clock</div>
                       <div><span class="text-slate-400">Token usage:</span> 14,289 prompt · 1,420 completion</div>
                       <div><span class="text-slate-400">Worker process:</span> coder (PID: 18920)</div>
-                      <div><span class="text-slate-400">Sandbox target:</span> /root/.hermes/kanban/workspaces/t_06e5983d</div>
+                      <div><span class="text-slate-400">Sandbox target:</span> <span class="sandbox-path">~/.hermes/kanban/workspaces/&lt;id&gt;</span></div>
                     </div>
                   </details>
                 </div>
@@ -2751,11 +2751,11 @@ Boundary sandbox wajib dipertahankan end-to-end: satu principal/credential set p
               <div class="space-y-2 text-xs">
                 <div class="flex items-center justify-between">
                   <span class="text-slate-500">Assigned agent</span>
-                  <span id="task-meta-assignee" class="font-semibold text-slate-900">coder</span>
+                  <span id="task-meta-assignee" class="font-semibold text-slate-900">—</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-slate-500">Priority</span>
-                  <span id="task-meta-priority" class="font-semibold text-slate-900">P100</span>
+                  <span id="task-meta-priority" class="font-semibold text-slate-900">—</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-slate-500">Created</span>
@@ -2774,7 +2774,7 @@ Boundary sandbox wajib dipertahankan end-to-end: satu principal/credential set p
             <div>
               <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wider mb-1.5">Workspace folder</div>
               <div class="bg-white border border-slate-200 rounded p-2 flex items-center justify-between text-[11px] font-mono text-slate-600 truncate mb-2">
-                <span id="task-meta-workspace" class="truncate">/root/.hermes/kanban/workspaces/t_06e5983d</span>
+                <span id="task-meta-workspace" class="truncate">~/.hermes/kanban/workspaces/&lt;id&gt;</span>
                 <button onclick="copyWorkspacePath()" class="hover:text-slate-800 p-0.5 ml-1 flex-shrink-0" title="Copy path">
                   <i data-lucide="copy" class="w-3 h-3 text-slate-400"></i>
                 </button>

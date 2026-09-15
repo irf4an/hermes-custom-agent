@@ -5,7 +5,7 @@ import sqlite3
 import os
 import time
 
-DB_PATH = os.environ.get('KANBAN_DB', '/root/.hermes/kanban.db')
+DB_PATH = os.environ.get('KANBAN_DB', os.path.join(os.path.expanduser('~'), '.hermes', 'kanban.db'))
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)

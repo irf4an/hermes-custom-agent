@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const VAULT_DIR = '/root/notes';
-const MEMORY_DIR = '/root/.hermes/memories';
-const PROFILES_DIR = '/root/.hermes/profiles';
+const VAULT_DIR = process.env.OBSIDIAN_VAULT_PATH || process.env.VAULT_DIR || (process.env.HOME + '/notes');
+const MEMORY_DIR = (process.env.HERMES_HOME || (process.env.HOME + '/.hermes')) + '/memories';
+const PROFILES_DIR = (process.env.HERMES_HOME || (process.env.HOME + '/.hermes')) + '/profiles';
 
 function scanVault(dir, base = '') {
   let results = [];
@@ -44,7 +44,7 @@ function buildGraphData() {
     category: 'Hub',
     val: 16,
     color: '#2563eb', // Blue-600
-    description: 'Central root of Obsidian knowledge vault (/root/notes)'
+    description: 'Central root of Obsidian knowledge vault (' + VAULT_DIR + ')'
   });
   nodes.push({
     id: 'hub:memory',
