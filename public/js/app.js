@@ -88,7 +88,7 @@
           loadChannelsView();
         }
       } else if (sectionName === 'Skills') {
-        pageTitle.textContent = 'Skills';
+        pageTitle.textContent = 'Skills & MCP';
         if (skillsView) {
           skillsView.classList.remove('hidden');
           loadSkillsView();

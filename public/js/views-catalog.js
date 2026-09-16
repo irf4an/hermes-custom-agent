@@ -802,9 +802,72 @@
         }
 
         renderSkillsCatalogGrid();
+        loadMCPSection();
         lucide.createIcons();
       } catch (err) {
         console.error('Error loadSkillsView:', err);
+      }
+    }
+
+    async function loadMCPSection() {
+      const grid = document.getElementById('mcp-grid');
+      const emptyEl = document.getElementById('mcp-empty');
+      const countEl = document.getElementById('mcp-count');
+      if (!grid) return;
+      try {
+        const data = await api('/api/mcp', {}, 'Gagal memuat MCP servers');
+        const servers = data.servers || [];
+        if (countEl) countEl.textContent = `[${data.stats ? data.stats.total : servers.length}]`;
+        if (servers.length === 0) {
+          grid.innerHTML = '';
+          if (emptyEl) emptyEl.classList.remove('hidden');
+          return;
+        }
+        if (emptyEl) emptyEl.classList.add('hidden');
+        grid.innerHTML = servers.map(s => `
+          <div class="p-4 bg-white border border-slate-200/90 rounded-xl shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="min-w-0">
+                  <div class="font-bold font-mono text-xs text-slate-900 truncate" title="${escapeHtml(s.name)}">
+                    ${escapeHtml(s.name)}
+                  </div>
+                  <div class="flex items-center gap-1.5 mt-1">
+                    <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium border bg-slate-100 text-slate-700 border-slate-200">
+                      ${escapeHtml(s.transport || 'stdio')}
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">${s.tools === null || s.tools === undefined ? '?' : s.tools} tools</span>
+                  </div>
+                </div>
+                <div>
+                  ${s.enabled ? `
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Aktif
+                    </span>
+                  ` : `
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                      <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                      Mati
+                    </span>
+                  `}
+                </div>
+              </div>
+              ${s.command ? `
+                <p class="text-[11px] text-slate-500 mt-2 font-mono truncate" title="${escapeHtml(s.command)}">
+                  ${escapeHtml(s.command)}
+                </p>
+              ` : ''}
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (err) {
+        console.error('Error loadMCPSection:', err);
+        if (emptyEl) {
+          emptyEl.classList.remove('hidden');
+          emptyEl.textContent = 'Gagal memuat MCP servers.';
+        }
       }
     }
 

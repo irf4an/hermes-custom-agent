@@ -121,7 +121,7 @@
         </div>
         <div class="nav-item" onclick="switchNav(this, 'Skills')">
           <i data-lucide="sparkles"></i>
-          <span>Skills</span>
+          <span>Skills & MCP</span>
         </div>
         <div class="nav-item" onclick="switchNav(this, 'Chat Logs')">
           <i data-lucide="history"></i>
@@ -1713,6 +1713,21 @@
 
           <div id="skills-catalog-empty" class="hidden py-12 text-center text-slate-400 text-xs">
             Tidak ada skill yang cocok dengan pencarian atau filter yang dipilih.
+          </div>
+        </div>
+
+        <!-- MCP Servers -->
+        <div class="dashboard-card">
+          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+            <h3><i data-lucide="server" style="width:16px;height:16px;color:#6366f1;"></i> MCP servers <span class="badge-pill" id="mcp-count">[0]</span></h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5" id="mcp-grid">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <div id="mcp-empty" class="hidden py-12 text-center text-slate-400 text-xs">
+            Tidak ada MCP server terhubung. Tambah via <code class="font-mono">hermes mcp add</code>.
           </div>
         </div>
       </div>

@@ -2805,6 +2805,45 @@ app.get('/api/skills/detail', (req, res) => {
   }
 });
 
+app.get('/api/mcp', (req, res) => {
+  try {
+    const cfgPath = path.join(HERMES_HOME, 'config.yaml');
+    let servers = {};
+    if (fs.existsSync(cfgPath)) {
+      const cfg = yaml.load(fs.readFileSync(cfgPath, 'utf8')) || {};
+      servers = cfg.mcp_servers || {};
+    }
+    let toolCounts = {};
+    try {
+      const cachePath = path.join(HERMES_HOME, 'cache', 'mcp_schema_cache.json');
+      if (fs.existsSync(cachePath)) {
+        const cache = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+        Object.keys(cache).forEach(k => {
+          toolCounts[k] = ((cache[k] && cache[k].tools) || []).length;
+        });
+      }
+    } catch (e) { /* schema cache is optional */ }
+    const list = Object.keys(servers).map(name => {
+      const s = servers[name] || {};
+      return {
+        name,
+        enabled: s.enabled !== false,
+        transport: s.url ? 'http' : 'stdio',
+        // NOTE: env is intentionally never exposed (may hold secrets)
+        command: s.command ? `${s.command} ${(s.args || []).join(' ')}`.trim() : (s.url || ''),
+        tools: Object.prototype.hasOwnProperty.call(toolCounts, name) ? toolCounts[name] : null
+      };
+    });
+    res.json({
+      success: true,
+      stats: { total: list.length, enabled: list.filter(s => s.enabled).length },
+      servers: list
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.post('/api/skills/create', (req, res) => {
   try {
     const { name, category, description, content } = req.body;
