@@ -2533,7 +2533,7 @@ app.get('/api/channels/overview', async (req, res) => {
       {
         id: 'twitter',
         name: 'X (Twitter)',
-        icon: 'twitter',
+        icon: 'at-sign',
         category: 'Social Network',
         description: 'Automated post publishing, mention replies, and DM handling via xurl CLI & Twitter API v2.',
         keys: [

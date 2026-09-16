@@ -493,7 +493,7 @@
               <div class="flex items-start justify-between gap-2 mb-2">
                 <div class="flex items-center gap-2.5 min-w-0">
                   <div class="w-8 h-8 rounded-lg ${isConf ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'} flex items-center justify-center shrink-0">
-                    <i data-lucide="${iconName}" class="w-4 h-4"></i>
+                    ${channelIconHtml(ch.id, iconName, 'w-4 h-4')}
                   </div>
                   <div class="truncate">
                     <div class="font-bold text-xs text-slate-900 truncate">${escapeHtml(ch.name)}</div>
@@ -580,7 +580,12 @@
       if (titleEl) titleEl.textContent = `Konfigurasi ${ch.name}`;
       if (subEl) subEl.textContent = `${ch.id} · ${ch.plugin || 'plugin'}`;
       if (descEl) descEl.textContent = ch.description || 'Masukkan kredensial integrasi untuk mengaktifkan channel ini.';
-      if (iconEl) iconEl.setAttribute('data-lucide', ch.icon || 'radio');
+      const wrap = document.getElementById('ch-modal-icon-wrap');
+      if (wrap) {
+        const brand = channelBrandSvg(ch.id, 'w-4 h-4');
+        wrap.innerHTML = brand || `<i data-lucide="${escapeHtml(ch.icon || 'radio')}" class="w-4 h-4"></i>`;
+        if (!brand && window.lucide) lucide.createIcons();
+      }
 
       if (inputsContainer && ch.keys) {
         inputsContainer.innerHTML = ch.keys.map(k => `
