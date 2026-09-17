@@ -24,7 +24,8 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 const OBSIDIAN_GIT_REMOTE = process.env.OBSIDIAN_GIT_REMOTE || '';
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.set('Pragma', 'no-cache');
@@ -1785,6 +1786,302 @@ app.delete('/api/drive/file', (req, res) => {
       fileName: path.basename(targetPath) 
     });
   } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Upload file to agent workspace (supports Drag-and-drop or file picker, base64 or text)
+app.post('/api/drive/upload', (req, res) => {
+  try {
+    const { agent, subPath, fileName, fileData, isBase64 } = req.body || {};
+    if (!agent || !fileName || fileData === undefined) {
+      return res.status(400).json({ success: false, error: 'Missing agent, fileName, or fileData' });
+    }
+
+    const cleanName = path.basename(fileName.trim());
+    if (!cleanName || cleanName === '.' || cleanName === '..') {
+      return res.status(400).json({ success: false, error: 'Invalid file name' });
+    }
+
+    const agentDir = getAgentWorkspaceDir(agent);
+    let targetDir = agentDir;
+    if (subPath) {
+      const cleanSub = subPath.replace(/^\/+|\/+$/g, '');
+      targetDir = path.resolve(agentDir, cleanSub);
+      if (!targetDir.startsWith(agentDir)) {
+        return res.status(403).json({ success: false, error: 'Access denied: path traversal detected' });
+      }
+    }
+
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    const targetFile = path.resolve(targetDir, cleanName);
+    if (!targetFile.startsWith(agentDir)) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+
+    if (isBase64) {
+      const buffer = Buffer.from(fileData, 'base64');
+      fs.writeFileSync(targetFile, buffer);
+    } else {
+      fs.writeFileSync(targetFile, fileData, 'utf8');
+    }
+
+    res.json({ success: true, fileName: cleanName, path: targetFile });
+  } catch (err) {
+    console.error('Error in /api/drive/upload:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Create new folder in workspace
+app.post('/api/drive/mkdir', (req, res) => {
+  try {
+    const { agent, subPath, folderName } = req.body || {};
+    if (!agent || !folderName) {
+      return res.status(400).json({ success: false, error: 'Missing agent or folderName' });
+    }
+
+    const cleanFolder = path.basename(folderName.trim());
+    if (!cleanFolder || cleanFolder === '.' || cleanFolder === '..') {
+      return res.status(400).json({ success: false, error: 'Invalid folder name' });
+    }
+
+    const agentDir = getAgentWorkspaceDir(agent);
+    let targetDir = agentDir;
+    if (subPath) {
+      const cleanSub = subPath.replace(/^\/+|\/+$/g, '');
+      targetDir = path.resolve(agentDir, cleanSub);
+      if (!targetDir.startsWith(agentDir)) {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+      }
+    }
+
+    const newDirPath = path.resolve(targetDir, cleanFolder);
+    if (!newDirPath.startsWith(agentDir)) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+
+    if (!fs.existsSync(newDirPath)) {
+      fs.mkdirSync(newDirPath, { recursive: true });
+      fs.writeFileSync(path.join(newDirPath, '.keep'), '');
+    }
+
+    res.json({ success: true, folderName: cleanFolder, path: newDirPath });
+  } catch (err) {
+    console.error('Error in /api/drive/mkdir:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Create new blank file in workspace
+app.post('/api/drive/new-file', (req, res) => {
+  try {
+    const { agent, subPath, fileName, content } = req.body || {};
+    if (!agent || !fileName) {
+      return res.status(400).json({ success: false, error: 'Missing agent or fileName' });
+    }
+
+    const cleanName = path.basename(fileName.trim());
+    if (!cleanName || cleanName === '.' || cleanName === '..') {
+      return res.status(400).json({ success: false, error: 'Invalid file name' });
+    }
+
+    const agentDir = getAgentWorkspaceDir(agent);
+    let targetDir = agentDir;
+    if (subPath) {
+      const cleanSub = subPath.replace(/^\/+|\/+$/g, '');
+      targetDir = path.resolve(agentDir, cleanSub);
+      if (!targetDir.startsWith(agentDir)) {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+      }
+    }
+
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    const targetFile = path.resolve(targetDir, cleanName);
+    if (!targetFile.startsWith(agentDir)) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+
+    fs.writeFileSync(targetFile, typeof content === 'string' ? content : '', 'utf8');
+    res.json({ success: true, fileName: cleanName, path: targetFile });
+  } catch (err) {
+    console.error('Error in /api/drive/new-file:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Save file content (Inline editor)
+app.post('/api/drive/save', (req, res) => {
+  try {
+    const { id, content } = req.body || {};
+    if (!id || typeof content !== 'string') {
+      return res.status(400).json({ success: false, error: 'Missing file id or content' });
+    }
+
+    let effectiveAgent, effectiveFile, effectiveCron = false, effectiveJobId;
+    const parts = id.split(':');
+    if (parts[0] === 'ws' && parts.length >= 3) {
+      effectiveAgent = parts[1];
+      effectiveFile = parts.slice(2).join(':');
+    } else if (parts[0] === 'cron' && parts.length >= 4) {
+      effectiveAgent = parts[1];
+      effectiveJobId = parts[2];
+      effectiveFile = parts.slice(3).join(':');
+      effectiveCron = true;
+    }
+
+    if (!effectiveAgent || !effectiveFile) {
+      return res.status(400).json({ success: false, error: 'Invalid file id parameter' });
+    }
+
+    let targetPath;
+    if (effectiveCron && effectiveJobId) {
+      const pDir = getProfileDir(effectiveAgent);
+      targetPath = path.resolve(pDir, 'cron', 'output', effectiveJobId, effectiveFile);
+      if (!targetPath.startsWith(path.join(pDir, 'cron', 'output'))) {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+      }
+    } else {
+      const agentDir = getAgentWorkspaceDir(effectiveAgent);
+      targetPath = path.resolve(agentDir, effectiveFile);
+      if (!targetPath.startsWith(agentDir)) {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+      }
+    }
+
+    fs.writeFileSync(targetPath, content, 'utf8');
+    res.json({ success: true, path: targetPath, size: Buffer.byteLength(content, 'utf8') });
+  } catch (err) {
+    console.error('Error in /api/drive/save:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Delete folder & all its contents from workspace or cron output
+app.delete('/api/drive/folder', (req, res) => {
+  try {
+    const { agent, folderPath, cron } = req.body || {};
+    if (!agent || !folderPath) {
+      return res.status(400).json({ success: false, error: 'Missing agent or folderPath' });
+    }
+
+    const cleanFolder = folderPath.replace(/^\/+|\/+$/g, '');
+    if (!cleanFolder || cleanFolder === '.' || cleanFolder === '..') {
+      return res.status(400).json({ success: false, error: 'Cannot delete root folder' });
+    }
+
+    let targetDir;
+    if (cron === true || cron === 'true' || cleanFolder.startsWith('cron/output/')) {
+      const pDir = getProfileDir(agent);
+      // cleanFolder might be 'cron/output/jobId' or 'jobId'
+      const relativePart = cleanFolder.replace(/^cron\/output\/?/, '');
+      targetDir = path.resolve(pDir, 'cron', 'output', relativePart);
+      const cronBase = path.join(pDir, 'cron', 'output');
+      if (!targetDir.startsWith(cronBase) || targetDir === cronBase) {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+      }
+    } else {
+      const agentDir = getAgentWorkspaceDir(agent);
+      targetDir = path.resolve(agentDir, cleanFolder);
+      if (!targetDir.startsWith(agentDir) || targetDir === agentDir) {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+      }
+    }
+
+    if (!fs.existsSync(targetDir)) {
+      return res.status(404).json({ success: false, error: 'Folder not found' });
+    }
+
+    fs.rmSync(targetDir, { recursive: true, force: true });
+    res.json({ success: true, folder: cleanFolder, message: `Folder "${path.basename(cleanFolder)}" berhasil dihapus` });
+  } catch (err) {
+    console.error('Error in /api/drive/folder:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Batch delete files and folders
+app.post('/api/drive/batch-delete', (req, res) => {
+  try {
+    const { items } = req.body || {};
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, error: 'Items array is required' });
+    }
+
+    let deletedCount = 0;
+    for (const item of items) {
+      try {
+        if (item.type === 'folder') {
+          const agent = item.agent;
+          const folderPath = (item.path || '').replace(/^\/+|\/+$/g, '');
+          if (!agent || !folderPath || folderPath === '.' || folderPath === '..') continue;
+
+          let targetDir;
+          if (item.cron || folderPath.startsWith('cron/output/')) {
+            const pDir = getProfileDir(agent);
+            const relativePart = folderPath.replace(/^cron\/output\/?/, '');
+            targetDir = path.resolve(pDir, 'cron', 'output', relativePart);
+            const cronBase = path.join(pDir, 'cron', 'output');
+            if (!targetDir.startsWith(cronBase) || targetDir === cronBase) continue;
+          } else {
+            const agentDir = getAgentWorkspaceDir(agent);
+            targetDir = path.resolve(agentDir, folderPath);
+            if (!targetDir.startsWith(agentDir) || targetDir === agentDir) continue;
+          }
+
+          if (fs.existsSync(targetDir)) {
+            fs.rmSync(targetDir, { recursive: true, force: true });
+            deletedCount++;
+          }
+        } else {
+          // File delete
+          const id = item.id;
+          let effectiveAgent, effectiveFile, effectiveCron = false, effectiveJobId;
+          if (id && typeof id === 'string') {
+            const parts = id.split(':');
+            if (parts[0] === 'ws' && parts.length >= 3) {
+              effectiveAgent = parts[1];
+              effectiveFile = parts.slice(2).join(':');
+            } else if (parts[0] === 'cron' && parts.length >= 4) {
+              effectiveAgent = parts[1];
+              effectiveJobId = parts[2];
+              effectiveFile = parts.slice(3).join(':');
+              effectiveCron = true;
+            }
+          }
+
+          if (!effectiveAgent || !effectiveFile) continue;
+
+          let targetPath;
+          if (effectiveCron && effectiveJobId) {
+            const pDir = getProfileDir(effectiveAgent);
+            targetPath = path.resolve(pDir, 'cron', 'output', effectiveJobId, effectiveFile);
+            if (!targetPath.startsWith(path.join(pDir, 'cron', 'output'))) continue;
+          } else {
+            const agentDir = getAgentWorkspaceDir(effectiveAgent);
+            targetPath = path.resolve(agentDir, effectiveFile);
+            if (!targetPath.startsWith(agentDir)) continue;
+          }
+
+          if (fs.existsSync(targetPath)) {
+            fs.unlinkSync(targetPath);
+            deletedCount++;
+          }
+        }
+      } catch (e) {
+        console.error('Error deleting batch item:', e);
+      }
+    }
+
+    res.json({ success: true, deletedCount });
+  } catch (err) {
+    console.error('Error in /api/drive/batch-delete:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

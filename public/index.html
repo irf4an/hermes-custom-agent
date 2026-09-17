@@ -1316,7 +1316,7 @@
         <!-- Files Section for Selected Agent -->
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
           <!-- Table Header / Toolbar -->
-          <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/50">
+          <div class="p-3.5 sm:p-4 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 bg-slate-50/50">
             <div class="flex items-center gap-2.5 min-w-0">
               <div class="w-8 h-8 rounded-lg bg-blue-100/70 border border-blue-200 text-blue-700 flex items-center justify-center flex-shrink-0">
                 <i data-lucide="hard-drive" class="w-4 h-4"></i>
@@ -1324,42 +1324,149 @@
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
                   <h4 class="text-sm font-bold text-slate-900 truncate" id="drive-current-agent-title">Agent / Outputs</h4>
-                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 font-mono text-slate-600" id="drive-current-agent-folder-path">~/workspace/</span>
+                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 font-mono text-slate-600 truncate max-w-[240px]" id="drive-current-agent-folder-path">~/workspace/</span>
                 </div>
-                <p class="text-[11.5px] text-slate-400" id="drive-current-agent-desc">Folder penyimpanan output agent di storage lokal VPS.</p>
+                <p class="text-[11.5px] text-slate-400 truncate" id="drive-current-agent-desc">Folder penyimpanan output agent di storage lokal VPS.</p>
               </div>
             </div>
 
-            <div class="flex items-center gap-2">
+            <!-- Toolbar Controls & Actions -->
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Search Input -->
               <div class="relative">
-                <input type="text" id="drive-file-search" oninput="filterDriveFiles()" placeholder="Search files..." class="w-44 sm:w-56 pl-7 pr-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" id="drive-file-search" oninput="filterDriveFiles()" placeholder="Search files..." class="w-40 sm:w-48 pl-7 pr-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                 <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2"></i>
               </div>
-              <button onclick="copyCurrentAgentPath()" class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition">
-                <i data-lucide="folder" class="w-3.5 h-3.5 text-blue-600"></i>
-                <span>Folder Path</span>
+
+              <!-- Category Filter Chips -->
+              <div class="inline-flex p-0.5 bg-slate-100/90 rounded-lg border border-slate-200 text-xs">
+                <button type="button" onclick="setDriveCategory('all')" id="drive-cat-all" class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white text-slate-900 shadow-2xs transition cursor-pointer">All</button>
+                <button type="button" onclick="setDriveCategory('document')" id="drive-cat-document" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">Docs</button>
+                <button type="button" onclick="setDriveCategory('media')" id="drive-cat-media" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">Media</button>
+                <button type="button" onclick="setDriveCategory('code')" id="drive-cat-code" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">Code</button>
+              </div>
+
+              <!-- View Style Toggle (Table vs Grid) -->
+              <div class="inline-flex p-0.5 bg-slate-100/90 rounded-lg border border-slate-200 text-xs">
+                <button type="button" onclick="setDriveViewMode('table')" id="drive-btn-view-table" class="px-2 py-1 rounded-md text-slate-900 bg-white shadow-2xs transition cursor-pointer" title="Table / List View">
+                  <i data-lucide="list" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" onclick="setDriveViewMode('grid')" id="drive-btn-view-grid" class="px-2 py-1 rounded-md text-slate-500 hover:text-slate-800 transition cursor-pointer" title="Grid / Thumbnail View">
+                  <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+
+              <!-- Mode Toggle: Tree (Directory) vs Flat (All Files) -->
+              <button type="button" onclick="toggleDriveBrowseMode()" id="drive-btn-mode" class="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition cursor-pointer" title="Beralih antara Mode Direktori Hirarkis dan Daftar Rata">
+                <i data-lucide="folder-tree" class="w-3.5 h-3.5 text-blue-600" id="drive-mode-icon"></i>
+                <span id="drive-mode-label">Folders</span>
+              </button>
+
+              <!-- Copy VPS Path -->
+              <button onclick="copyCurrentAgentPath()" class="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition cursor-pointer" title="Salin path direktori aktif">
+                <i data-lucide="folder" class="w-3.5 h-3.5 text-slate-600"></i>
+                <span id="btn-copy-path-text">Copy Path</span>
+              </button>
+
+              <!-- Action Buttons: Upload, +Folder, +File -->
+              <div class="flex items-center gap-1.5 pl-1.5 border-l border-slate-200">
+                <input type="file" id="drive-file-picker" multiple class="hidden" onchange="handleDriveFilePicker(event)">
+                <button type="button" onclick="document.getElementById('drive-file-picker').click()" class="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition cursor-pointer" title="Upload berkas ke direktori ini">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                  <span>Upload</span>
+                </button>
+                <button type="button" onclick="promptCreateDriveFolder()" class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition cursor-pointer" title="Buat folder baru di subpath ini">
+                  <i data-lucide="folder-plus" class="w-3.5 h-3.5 text-amber-600"></i>
+                  <span class="hidden sm:inline">Folder</span>
+                </button>
+                <button type="button" onclick="promptCreateDriveFile()" class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition cursor-pointer" title="Buat berkas baru di subpath ini">
+                  <i data-lucide="file-plus" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  <span class="hidden sm:inline">File</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selection Action Bar (Sticky floating when items selected) -->
+          <div id="drive-selection-bar" class="hidden px-4 py-2.5 bg-slate-900 text-white flex items-center justify-between gap-3 text-xs shadow-md select-none transition-all">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+              <span class="font-bold text-slate-100" id="drive-selected-count">0 item terpilih</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="deleteSelectedDriveItems()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-xs transition cursor-pointer">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Hapus Terpilih</span>
+              </button>
+              <button type="button" onclick="clearDriveSelection()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition cursor-pointer">
+                Batal
               </button>
             </div>
           </div>
 
-          <!-- Files Table -->
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider">
-                <tr>
-                  <th class="py-3 px-4">Deliverable / File</th>
-                  <th class="py-3 px-3">Source Task</th>
-                  <th class="py-3 px-3">Type</th>
-                  <th class="py-3 px-3">Size</th>
-                  <th class="py-3 px-3">Generated</th>
-                  <th class="py-3 px-3">Storage Status</th>
-                  <th class="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100" id="drive-files-tbody">
-                <!-- Rows injected dynamically -->
-              </tbody>
-            </table>
+          <!-- Interactive Breadcrumb Address Bar -->
+          <div class="px-4 py-2 bg-slate-100/80 border-b border-slate-200 flex items-center justify-between gap-3 text-xs select-none">
+            <div class="flex items-center gap-1.5 min-w-0 overflow-x-auto py-0.5" id="drive-breadcrumbs">
+              <!-- Rendered dynamically -->
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0 text-[11px] text-slate-500 font-mono" id="drive-current-folder-stats">
+              <!-- e.g. "3 folders · 12 files" -->
+            </div>
+          </div>
+
+          <!-- Files Views Container (with Drag & Drop Dropzone) -->
+          <div class="relative" id="drive-dropzone-container" ondragover="handleDriveDragOver(event)" ondragleave="handleDriveDragLeave(event)" ondrop="handleDriveDrop(event)">
+            <!-- Drag Overlay -->
+            <div id="drive-drag-overlay" class="hidden absolute inset-0 z-30 bg-blue-500/10 backdrop-blur-[2px] border-2 border-dashed border-blue-500 rounded-b-xl flex flex-col items-center justify-center pointer-events-none transition-all duration-150">
+              <div class="p-4 bg-white/95 shadow-lg rounded-2xl border border-blue-200 flex flex-col items-center text-center max-w-sm">
+                <i data-lucide="upload-cloud" class="w-10 h-10 text-blue-600 mb-2 animate-bounce"></i>
+                <h5 class="text-xs font-bold text-slate-900">Drop berkas untuk upload</h5>
+                <p class="text-[10.5px] text-slate-500 font-mono mt-0.5" id="drive-drag-dest-path">Target: ~/workspace/</p>
+              </div>
+            </div>
+
+            <!-- Files Table View -->
+            <div id="drive-view-table" class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider select-none">
+                  <tr>
+                    <th class="w-10 py-3 px-3 text-center">
+                      <input type="checkbox" id="drive-select-all-box" onchange="toggleDriveSelectAll(this.checked)" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" title="Pilih Semua">
+                    </th>
+                    <th class="py-3 px-3 cursor-pointer hover:bg-slate-100/80 hover:text-slate-800 transition" onclick="toggleDriveSort('name')">
+                      <div class="flex items-center gap-1">
+                        <span>Deliverable / File</span>
+                        <span id="sort-icon-name"><i data-lucide="chevrons-up-down" class="w-3 h-3 text-slate-400"></i></span>
+                      </div>
+                    </th>
+                    <th class="py-3 px-3">Source Task</th>
+                    <th class="py-3 px-3">Type</th>
+                    <th class="py-3 px-3 cursor-pointer hover:bg-slate-100/80 hover:text-slate-800 transition" onclick="toggleDriveSort('size')">
+                      <div class="flex items-center gap-1">
+                        <span>Size</span>
+                        <span id="sort-icon-size"><i data-lucide="chevrons-up-down" class="w-3 h-3 text-slate-400"></i></span>
+                      </div>
+                    </th>
+                    <th class="py-3 px-3 cursor-pointer hover:bg-slate-100/80 hover:text-slate-800 transition" onclick="toggleDriveSort('mtime')">
+                      <div class="flex items-center gap-1">
+                        <span>Generated</span>
+                        <span id="sort-icon-mtime"><i data-lucide="chevrons-up-down" class="w-3 h-3 text-slate-400"></i></span>
+                      </div>
+                    </th>
+                    <th class="py-3 px-3">Storage Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="drive-files-tbody">
+                  <!-- Rows injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Files Grid / Thumbnail View -->
+            <div id="drive-view-grid" class="p-4 hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5 bg-slate-50/20 min-h-[220px]">
+              <!-- Grid cards injected dynamically -->
+            </div>
           </div>
         </div>
       </div>
@@ -1375,14 +1482,21 @@
                 <span class="text-[10.5px] font-mono text-slate-400" id="drive-preview-meta">Meta</span>
               </div>
             </div>
-            <button onclick="closeDrivePreviewModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200/60 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
-              <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
+            <div class="flex items-center gap-2">
+              <button id="drive-preview-edit-toggle" onclick="toggleDriveEditorMode()" class="hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition cursor-pointer" title="Edit berkas ini secara langsung">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-blue-600" id="drive-preview-edit-icon"></i>
+                <span id="drive-preview-edit-text">Edit</span>
+              </button>
+              <button onclick="closeDrivePreviewModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200/60 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
           
-          <!-- Media Player / Text Content Body -->
-          <div class="p-4 overflow-y-auto flex-1 bg-slate-900/5 min-h-[220px] flex flex-col justify-center" id="drive-preview-container">
+          <!-- Media Player / Text Content Body / Inline Editor -->
+          <div class="p-4 overflow-y-auto flex-1 bg-slate-900/5 min-h-[220px] flex flex-col justify-center relative" id="drive-preview-container">
             <div class="font-mono text-xs text-slate-800 leading-relaxed whitespace-pre-wrap select-text bg-white p-4 rounded-xl border border-slate-200 shadow-2xs" id="drive-preview-body"></div>
+            <textarea id="drive-preview-editor" class="hidden w-full font-mono text-xs text-slate-900 bg-white p-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed resize-y h-[55vh]" placeholder="Tulis atau edit konten di sini..." onkeydown="handleDriveEditorKeyDown(event)"></textarea>
             <div id="drive-preview-media-wrapper" class="hidden flex flex-col items-center justify-center w-full"></div>
           </div>
 
@@ -1391,6 +1505,10 @@
               <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-emerald-600"></i> Stored in Local VPS Storage
             </span>
             <div class="flex items-center gap-2">
+              <button id="drive-preview-save-btn" onclick="saveDriveCurrentFile()" class="hidden inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs font-semibold text-white transition shadow-xs cursor-pointer" title="Simpan perubahan ke VPS (Ctrl+S)">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                <span id="drive-preview-save-label">Save (Ctrl+S)</span>
+              </button>
               <button onclick="deleteCurrentDrivePreviewFile()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-xs font-semibold text-rose-700 border border-rose-200 transition cursor-pointer" title="Hapus berkas ini dari VPS">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
                 <span>Hapus</span>
@@ -2081,7 +2199,7 @@
             <div class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-xs border border-slate-200/90 rounded-lg px-3 py-2 shadow-xs text-[10.5px] pointer-events-none select-none z-10">
               <div class="font-bold text-slate-700 uppercase tracking-wider text-[9px] mb-1.5 flex items-center justify-between gap-4">
                 <span>Cluster Legend</span>
-                <span class="text-slate-400 font-mono text-[8.5px]">32 Nodes</span>
+                <span id="graph-legend-nodes" class="text-slate-400 font-mono text-[8.5px]">32 Nodes</span>
               </div>
               <div class="grid grid-cols-2 gap-x-4 gap-y-1">
                 <div class="flex items-center gap-1.5">
@@ -2864,12 +2982,12 @@ Boundary sandbox wajib dipertahankan end-to-end: satu principal/credential set p
   <script src="/js/core.js"></script>
   <script src="/js/views-team.js"></script>
   <script src="/js/views-schedule-kanban.js"></script>
-  <script src="/js/views-docs-drive.js"></script>
+  <script src="/js/views-docs-drive.js?v=20260917_04"></script>
   <script src="/js/views-chat.js"></script>
   <script src="/js/brand-icons.js"></script>
   <script src="/js/views-catalog.js"></script>
   <script src="/js/app.js"></script>
   <script src="/js/views-office.js"></script>
-  <script src="/js/views-graph-vault.js"></script>
+  <script src="/js/views-graph-vault.js?v=20260917_02"></script>
 </body>
 </html>

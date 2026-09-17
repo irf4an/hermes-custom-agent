@@ -18,3 +18,4 @@ build/
 channels_config.local.json
 channels_config.json
 *.bak.*
+graphify-out/

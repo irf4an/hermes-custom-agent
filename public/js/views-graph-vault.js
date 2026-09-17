@@ -28,8 +28,10 @@
         if (graphData && graphData.stats) {
           const nEl = document.getElementById('graph-stat-nodes');
           const lEl = document.getElementById('graph-stat-links');
+          const legEl = document.getElementById('graph-legend-nodes');
           if (nEl) nEl.textContent = graphData.stats.totalNodes || 0;
           if (lEl) lEl.textContent = graphData.stats.totalLinks || 0;
+          if (legEl) legEl.textContent = `${graphData.stats.totalNodes || 0} Nodes`;
         }
 
         initGraphCanvas();
@@ -50,15 +52,15 @@
 
       // Natural cluster anchors like Obsidian Graph
       const clusterCenters = {
-        'hub:vault': { x: -180, y: -50 },
-        'hub:daily': { x: 190, y: -70 },
-        'hub:branding': { x: 200, y: 90 },
-        'hub:memory': { x: -90, y: 130 },
-        'note': { x: -180, y: -50 },
-        'daily': { x: 190, y: -70 },
-        'branding': { x: 200, y: 90 },
-        'memory': { x: -90, y: 130 },
-        'user_profile': { x: -120, y: 160 }
+        'hub:vault': { x: -260, y: -120 },
+        'hub:daily': { x: 260, y: -120 },
+        'hub:branding': { x: 260, y: 160 },
+        'hub:memory': { x: -140, y: 180 },
+        'note': { x: -260, y: -120 },
+        'daily': { x: 260, y: -120 },
+        'branding': { x: 260, y: 160 },
+        'memory': { x: -140, y: 180 },
+        'user_profile': { x: -300, y: 240 }
       };
 
       graphNodes = graphData.nodes.map(n => {
@@ -90,30 +92,43 @@
       graphPanY = h / 2;
     }
 
+    function resizeGraphCanvas() {
+      const canvas = document.getElementById('obsidian-graph-canvas');
+      if (!canvas) return;
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const rect = parent.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = Math.floor(rect.width) || 800;
+      const cssH = Math.floor(rect.height) || 600;
+      if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
+        canvas.width = cssW * dpr;
+        canvas.height = cssH * dpr;
+      }
+      if (!graphPanX && !graphPanY) {
+        graphPanX = cssW / 2;
+        graphPanY = cssH / 2;
+      }
+      renderGraph();
+    }
+
     function initGraphCanvas() {
       const canvas = document.getElementById('obsidian-graph-canvas');
       if (!canvas) return;
 
-      const resizeCanvas = () => {
-        const parent = canvas.parentElement;
-        if (!parent) return;
-        const rect = parent.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        const cssW = rect.width || 800;
-        const cssH = rect.height || 600;
-        canvas.width = cssW * dpr;
-        canvas.height = cssH * dpr;
-        if (!graphPanX && !graphPanY) {
-          graphPanX = cssW / 2;
-          graphPanY = cssH / 2;
-        }
-        renderGraph();
-      };
+      resizeGraphCanvas();
 
-      resizeCanvas();
+      if (!canvas._hasResizeObserver && window.ResizeObserver) {
+        const ro = new ResizeObserver(() => {
+          resizeGraphCanvas();
+        });
+        ro.observe(canvas.parentElement);
+        canvas._hasResizeObserver = true;
+      }
+
       if (canvas._hasGraphEvents) return;
 
-      window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('resize', resizeGraphCanvas);
 
       function getCanvasPos(e) {
         const rect = canvas.getBoundingClientRect();
@@ -202,11 +217,18 @@
 
         if (graphDraggingNode) {
           if (distMoved < 6) {
-            selectGraphNode(graphDraggingNode);
+            if (graphSelectedNode && graphSelectedNode.id === graphDraggingNode.id) {
+              closeGraphInspector();
+            } else {
+              selectGraphNode(graphDraggingNode);
+            }
           }
           graphDraggingNode.isDragging = false;
           graphDraggingNode = null;
         } else if (graphIsPanning) {
+          if (distMoved < 6 && graphSelectedNode) {
+            closeGraphInspector();
+          }
           graphIsPanning = false;
         }
 
@@ -260,9 +282,8 @@
     }
 
     function stepPhysics() {
-      const kRepulsion = 1600 * graphAlpha;
+      const kRepulsion = 3600 * graphAlpha;
       const kSpring = 0.035;
-      const targetDist = 120;
       const kCenter = 0.0035 * graphAlpha;
 
       for (let i = 0; i < graphNodes.length; i++) {
@@ -286,6 +307,8 @@
         const l = graphLinks[i];
         const s = l.source;
         const t = l.target;
+        const isHubLink = s.group === 'hub' || t.group === 'hub';
+        const targetDist = isHubLink ? 180 : 120;
         const dx = t.x - s.x;
         const dy = t.y - s.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -346,7 +369,7 @@
       ctx.translate(graphPanX, graphPanY);
       ctx.scale(graphZoomLevel, graphZoomLevel);
 
-      const activeFocusNode = graphHoveredNode || graphSelectedNode;
+      const activeFocusNode = graphSelectedNode || graphHoveredNode;
       const connectedNodeIds = new Set();
       if (activeFocusNode) {
         connectedNodeIds.add(activeFocusNode.id);
@@ -374,16 +397,16 @@
         ctx.lineTo(t.x, t.y);
 
         if (isHighlighted) {
-          ctx.strokeStyle = '#0f172a'; // Bold slate-900
-          ctx.lineWidth = 2.4 / graphZoomLevel;
+          ctx.strokeStyle = '#2563eb'; // Vibrant high-contrast blue for active link
+          ctx.lineWidth = 2.8 / graphZoomLevel;
           ctx.globalAlpha = 1.0;
         } else if (isDimmed) {
-          ctx.strokeStyle = '#e2e8f0';
-          ctx.lineWidth = 0.8 / graphZoomLevel;
-          ctx.globalAlpha = 0.16;
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1.0 / graphZoomLevel;
+          ctx.globalAlpha = 0.40;
         } else {
           ctx.strokeStyle = '#94a3b8'; // Solid slate-400
-          ctx.lineWidth = 1.3 / graphZoomLevel;
+          ctx.lineWidth = 1.4 / graphZoomLevel;
           ctx.globalAlpha = 0.70;
         }
         ctx.stroke();
@@ -402,7 +425,7 @@
         if (isFiltered) {
           ctx.globalAlpha = 0.12;
         } else if (isDimmed) {
-          ctx.globalAlpha = 0.22;
+          ctx.globalAlpha = 0.38;
         } else {
           ctx.globalAlpha = 1.0;
         }
@@ -412,8 +435,16 @@
         // Glowing halo for selected/focused node
         if (isFocus) {
           ctx.beginPath();
-          ctx.arc(n.x, n.y, r + 6 / graphZoomLevel, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
+          ctx.arc(n.x, n.y, r + 7 / graphZoomLevel, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(37, 99, 235, 0.18)';
+          ctx.fill();
+          ctx.lineWidth = 2.5 / graphZoomLevel;
+          ctx.strokeStyle = '#2563eb';
+          ctx.stroke();
+        } else if (n === graphHoveredNode && !graphSelectedNode) {
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, r + 5 / graphZoomLevel, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(148, 163, 184, 0.2)';
           ctx.fill();
         }
 
@@ -434,38 +465,63 @@
           ctx.stroke();
         }
 
-        // Labels: Obsidian clean style (hubs + focused nodes only by default)
+        // Labels: Obsidian clean style
         if (!isFiltered) {
           const isHub = n.group === 'hub';
-          const shouldShowText = isHub || isFocus || isConnected || (graphShowLabels && graphZoomLevel >= 1.4);
+          const isHover = (n === graphHoveredNode);
+          const hasPill = isFocus || isHub || isHover || (activeFocusNode && isConnected);
+
+          let shouldShowText = false;
+          if (activeFocusNode) {
+            shouldShowText = isFocus || isConnected;
+          } else if (graphShowLabels) {
+            shouldShowText = isHub || isHover || (n.degree && n.degree >= 3) || graphZoomLevel >= 1.25;
+          } else {
+            shouldShowText = isHub || isHover;
+          }
+
           if (shouldShowText) {
             const fontSize = Math.max(9.5, Math.min(12.5, (isHub ? 11.5 : 10.5) / Math.sqrt(graphZoomLevel)));
             ctx.font = `600 ${fontSize}px Inter, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            const labelY = n.y + r + (8 / graphZoomLevel);
-            const textMetrics = ctx.measureText(n.label);
-            const textW = textMetrics.width;
-            const padX = 5 / graphZoomLevel;
-            const padY = 2.5 / graphZoomLevel;
-
-            // Crisp rounded badge pill behind text
-            ctx.save();
-            ctx.fillStyle = isFocus ? '#0f172a' : (isHub ? '#1e293b' : 'rgba(255, 255, 255, 0.96)');
-            ctx.strokeStyle = isFocus ? '#0f172a' : (isHub ? '#1e293b' : '#cbd5e1');
-            ctx.lineWidth = 1 / graphZoomLevel;
-            ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(n.x - textW / 2 - padX, labelY - fontSize / 2 - padY, textW + padX * 2, fontSize + padY * 2, 3 / graphZoomLevel);
-            } else {
-              ctx.rect(n.x - textW / 2 - padX, labelY - fontSize / 2 - padY, textW + padX * 2, fontSize + padY * 2);
+            let labelText = n.label;
+            if (!isHub && !isFocus && labelText.length > 22) {
+              labelText = labelText.slice(0, 20) + '…';
             }
-            ctx.fill();
-            ctx.stroke();
 
-            ctx.fillStyle = (isFocus || isHub) ? '#ffffff' : '#1e293b';
-            ctx.fillText(n.label, n.x, labelY);
+            const labelY = n.y + r + (8 / graphZoomLevel);
+
+            ctx.save();
+            if (hasPill) {
+              const textMetrics = ctx.measureText(labelText);
+              const textW = textMetrics.width;
+              const padX = 5 / graphZoomLevel;
+              const padY = 2.5 / graphZoomLevel;
+
+              ctx.fillStyle = isFocus ? '#0f172a' : (isHub ? '#1e293b' : 'rgba(255, 255, 255, 0.96)');
+              ctx.strokeStyle = isFocus ? '#0f172a' : (isHub ? '#1e293b' : (isConnected ? '#94a3b8' : '#cbd5e1'));
+              ctx.lineWidth = (isFocus || isConnected) ? (1.5 / graphZoomLevel) : (1 / graphZoomLevel);
+              ctx.beginPath();
+              if (ctx.roundRect) {
+                ctx.roundRect(n.x - textW / 2 - padX, labelY - fontSize / 2 - padY, textW + padX * 2, fontSize + padY * 2, 3 / graphZoomLevel);
+              } else {
+                ctx.rect(n.x - textW / 2 - padX, labelY - fontSize / 2 - padY, textW + padX * 2, fontSize + padY * 2);
+              }
+              ctx.fill();
+              ctx.stroke();
+
+              ctx.fillStyle = (isFocus || isHub) ? '#ffffff' : (isConnected ? '#0f172a' : '#1e293b');
+              ctx.fillText(labelText, n.x, labelY);
+            } else {
+              // Lightweight Obsidian style text with white halo for non-hub nodes
+              ctx.lineWidth = 3 / graphZoomLevel;
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+              ctx.strokeText(labelText, n.x, labelY);
+              ctx.fillStyle = '#334155';
+              ctx.fillText(labelText, n.x, labelY);
+            }
             ctx.restore();
           }
         }
@@ -534,6 +590,17 @@
       const inspector = document.getElementById('graph-node-inspector');
       if (!inspector) return;
       inspector.classList.remove('hidden');
+      resizeGraphCanvas();
+
+      const canvas = document.getElementById('obsidian-graph-canvas');
+      if (canvas) {
+        const dpr = window.devicePixelRatio || 1;
+        const visibleW = canvas.width / dpr;
+        const screenX = node.x * graphZoomLevel + graphPanX;
+        if (screenX > visibleW - 60 || screenX < 60) {
+          graphPanX = (visibleW / 2) - (node.x * graphZoomLevel);
+        }
+      }
 
       document.getElementById('inspector-title').textContent = node.label;
       document.getElementById('inspector-degree').textContent = `${node.degree || 0} links`;
@@ -571,7 +638,7 @@
         const { ok: gNodeOk, data } = await apiFull(`/api/graph/node?id=${encodeURIComponent(node.id)}`);
         if (gNodeOk) {
           if (contentBox) {
-            contentBox.textContent = data.content || data.node?.excerpt || '(No content text)';
+            contentBox.textContent = data.content || data.node?.excerpt || node.description || node.excerpt || '(No content text)';
           }
 
           const linksList = document.getElementById('inspector-links-list');
@@ -591,7 +658,7 @@
           }
         }
       } catch (err) {
-        if (contentBox) contentBox.textContent = node.excerpt || 'Gagal memuat detail node';
+        if (contentBox) contentBox.textContent = node.description || node.excerpt || 'Gagal memuat detail node';
       }
 
       renderGraph();
@@ -614,6 +681,7 @@
       const inspector = document.getElementById('graph-node-inspector');
       if (inspector) inspector.classList.add('hidden');
       graphSelectedNode = null;
+      resizeGraphCanvas();
       renderGraph();
     }
 
